@@ -117,26 +117,28 @@ void run_cpp(int N) {
 }
 
 using std::chrono::high_resolution_clock;
+using std::chrono::duration;
 using std::chrono::duration_cast;
-using std::chrono::milliseconds;
+
 
 template<class F>
-long timeit(F f) {
+double timeit(F f) {
     auto t1 = high_resolution_clock::now();
     f();
     auto t2 = high_resolution_clock::now();
-    auto ms_int = duration_cast<milliseconds>(t2 - t1);
-    return ms_int.count();
+    duration<double, std::milli> ms_double = t2 - t1;
+    return ms_double.count();
 }
 
 
 int main() {
-    int N = 10000000;
+    int N = 100000000;
     
     auto t1 = timeit(std::bind_front(run_cpp, N));
-    auto t2 = timeit(std::bind_front(run_poly, N));
-
     std::cout << "CPP: " << t1 << "ms" << std::endl;
+
+    auto t2 = timeit(std::bind_front(run_poly, N));
     std::cout << "Poly: " << t2 << "ms" << std::endl;
-    std::cout << "CPP / Poly = " << (float)t1 / (float)t2 << std::endl;
+
+    // std::cout << "CPP / Poly = " << (float)t1 / (float)t2 << std::endl;
 }
