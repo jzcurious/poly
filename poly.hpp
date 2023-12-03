@@ -2,6 +2,7 @@
 #define _POLY_HPP_
 
 #include <functional>
+#include <string_view>
 
 namespace poly {
 
