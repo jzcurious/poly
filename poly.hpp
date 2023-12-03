@@ -13,8 +13,8 @@ concept has_scid = requires(D d) { d.scid; };
 #define __tostr(_x) __tostr_(_x)
 #define __tostr_(_x) #_x
 #define __generate_cid() __tostr(__LINE__) __FILE_NAME__
-#define __implementation__ static constexpr cid_t scid = "D" __generate_cid(); cid_t cid = scid;
-#define __cid(_cid) static constexpr cid_t scid = _cid; cid_t cid = _cid;
+#define __implementation__ public: static constexpr cid_t scid = "D" __generate_cid(); cid_t cid = scid;
+#define __cid(_cid) public: static constexpr cid_t scid = _cid; cid_t cid = _cid;
 #define __collect_derived_cids(_derived) static constexpr cid_t derived_cids[] = { _derived::scid ... };
 #define __polymorphic__ public: __cid("B" __generate_cid()) __collect_derived_cids(Derived)
 
@@ -77,9 +77,12 @@ auto _method(Ts... args) {                                                      
 
 #define __unused(_a) [[maybe_unused]] _a
 
+#define __interface_call_msg__ \
+    std::string("Calling the interface \"") + __PRETTY_FUNCTION__ + "\" is prohibited"
+
 #define __interface(_name, _ret, ...) \
 [[maybe_unused]] _ret $##_name (FOR_EACH(__unused, __VA_ARGS__)) {  \
-    throw std::logic_error("Calling the interface is prohibited."); \
+    throw std::logic_error(__interface_call_msg__);                 \
     return _ret{};                                                  \
 }
 

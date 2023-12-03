@@ -12,14 +12,14 @@ class ChildC;
 template<class... Derived>
 class Base {
     __polymorphic__
-    __dispatch(echo_tag)
-    __dispatch(div)
-    __dispatch(repeat)
-    __dispatch(mul)
+        __dispatch(echo_tag)
+        __dispatch(div)
+        __dispatch(repeat)
+        __dispatch(mul)
 
 private:
     void $echo_tag() {
-        std::cout << __FUNCTION__ <<  std::endl;
+        std::cout << __FUNCTION__ << std::endl;
     }
 
     float $div(int a, int b) {
@@ -38,9 +38,8 @@ private:
 
 
 class ChildA : public Base<ChildA, ChildB, ChildC> {
-public:
     __implementation__
-
+public:
     void echo_tag(int i) {
         std::cout << __PRETTY_FUNCTION__ << i << std::endl;
     }
@@ -71,9 +70,8 @@ public:
 
 
 class ChildB : public Base<ChildA, ChildB, ChildC> {
-public:
     __implementation__
-
+public:
     void echo_tag() {
         std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
@@ -96,9 +94,8 @@ public:
 
 
 class ChildC : public Base<ChildA, ChildB, ChildC> {
-public:
     __implementation__
-
+public:
     void echo_tag() {
         std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
