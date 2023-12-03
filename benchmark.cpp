@@ -140,5 +140,5 @@ int main() {
     auto t2 = timeit(std::bind_front(run_poly, N));
     std::cout << "Poly: " << t2 << "ms" << std::endl;
 
-    // std::cout << "CPP / Poly = " << (float)t1 / (float)t2 << std::endl;
+    std::cout << "CPP / Poly = " << (float)t1 / (float)t2 << std::endl;
 }
