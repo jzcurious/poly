@@ -9,8 +9,7 @@ class PolyChildA;
 class PolyChildB;
 class PolyChildC;
 
-template<class... Derived>
-class PolyBase {
+__base class PolyBase {
     __polymorphic__
         __dispatch(mul_arity5)
 public:

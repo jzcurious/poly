@@ -18,6 +18,7 @@ concept has_scid = requires(D d) { d.scid; };
 #define __cid(_cid) public: static constexpr cid_t scid = _cid; cid_t cid = _cid;
 #define __collect_derived_cids(_derived) static constexpr cid_t derived_cids[] = { _derived::scid ... };
 #define __polymorphic__ public: __cid("B" __generate_cid()) __collect_derived_cids(Derived)
+#define __base template<class... Derived>
 
 #define __make_dispatch_table(_method)                                                        \
 template<class D, typename ResT, typename... ArgsT>                                           \
