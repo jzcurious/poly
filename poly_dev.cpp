@@ -1,6 +1,6 @@
+#include "poly.hpp"
 #include <iostream>
 #include <vector>
-#include "poly.hpp"
 
 using namespace poly;
 
@@ -8,16 +8,14 @@ class ChildA;
 class ChildB;
 class ChildC;
 
+__base__ class Base {
+    __polymorphic__;
+    __dispatch(echo_tag);
+    __dispatch(div);
+    __dispatch(repeat);
+    __dispatch(mul);
 
-template<class... Derived>
-class Base {
-    __polymorphic__
-        __dispatch(echo_tag)
-        __dispatch(div)
-        __dispatch(repeat)
-        __dispatch(mul)
-
-private:
+public:
     void $echo_tag() {
         std::cout << __FUNCTION__ << std::endl;
     }
@@ -33,12 +31,12 @@ private:
         return { a_, a_ };
     }
 
-    __interface(mul, float, int a, int b)
+    __interface(mul, float, int a, int b);
 };
 
-
 class ChildA : public Base<ChildA, ChildB, ChildC> {
-    __implementation__
+    __implementation__;
+
 public:
     void echo_tag(int i) {
         std::cout << __PRETTY_FUNCTION__ << i << std::endl;
@@ -68,9 +66,9 @@ public:
     }
 };
 
-
 class ChildB : public Base<ChildA, ChildB, ChildC> {
-    __implementation__
+    __implementation__;
+
 public:
     void echo_tag() {
         std::cout << __PRETTY_FUNCTION__ << std::endl;
@@ -92,9 +90,9 @@ public:
     }
 };
 
-
 class ChildC : public Base<ChildA, ChildB, ChildC> {
-    __implementation__
+    __implementation__;
+
 public:
     void echo_tag() {
         std::cout << __PRETTY_FUNCTION__ << std::endl;
@@ -115,7 +113,6 @@ public:
         return a * b;
     }
 };
-
 
 int main() {
     using Base = Base<ChildA, ChildB, ChildC>;
@@ -155,7 +152,7 @@ int main() {
     std::cout << pack[2]->mul(111, 222) << std::endl;
     std::cout << pack[3]->mul(111, 222) << std::endl;
 
-    std::cout << pack[0]->mul(111, 222) << std::endl;
+    std::cout << std::endl << pack[0]->mul(111, 222) << std::endl;
 
     return 0;
 }
