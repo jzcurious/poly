@@ -7,17 +7,19 @@ The implementation of polymorphism without vtables
 
 |             | Time                                  |
 | ----------- | --------------------------------------|
-| Poly        | 1981.30664ms (total), 0.00002ms (avg) |
-| CPP vtable  | 4218.90782ms (total), 0.00004ms (avg) |
-| Speedup     | 2.129                                 |
+| Poly        | 2910.50998ms (total), 0.00003ms (avg) |
+| CPP vtable  | 17413.49896ms (total), 0.00017ms (avg)|
+| Speedup     | 5.983                                 |
+
 
 ##### clang++ 16.0.6
 
 |             | Time                                  |
 | ----------- | --------------------------------------|
-| Poly        | 2454.93497ms (total), 0.00002ms (avg) |
-| CPP vtable  | 4305.48072ms (total), 0.00004ms (avg) |
-| Speedup     | 1.754                                 |
+| Poly        | 4117.48131ms (total), 0.00004ms (avg) |
+| CPP vtable  | 16876.41915ms (total), 0.00017ms (avg)|
+| Speedup     | 4.099                                 |
+
 
 *(see benchmark.cpp)*
 

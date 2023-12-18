@@ -7,7 +7,7 @@ template <class D>
 concept has_cid = requires(D d) { d.cid; };
 
 using cid_t = long int;
-#define __generate_cid() __COUNTER__ + 1
+#define __generate_cid() __LINE__ + 1
 
 #define __base__ template <class... Derived>
 
@@ -16,13 +16,19 @@ public:                                                   \
     static constexpr const cid_t scid = __generate_cid(); \
     const cid_t cid = scid
 
+#define __implementation(_cid)                \
+public:                                       \
+    static constexpr const cid_t scid = _cid; \
+    const cid_t cid = _cid
+
 #define __polymorphic__                             \
 public:                                             \
     static constexpr cid_t scid = __generate_cid(); \
     const cid_t cid = scid;                         \
                                                     \
 private:                                            \
-    cid_t rcid = 0
+    bool _is_base_inst = false;                     \
+    bool _is_derived_inst = true
 
 #define __end_of_method__ static_assert(true, "")
 
@@ -50,36 +56,35 @@ private:                                            \
     }                                                                                                 \
     __end_of_method__
 
-#define __dispatch(_method)                                                                     \
-public:                                                                                         \
-    __dispatch_case(_method);                                                                   \
-    template <typename... Ts>                                                                   \
-    inline auto _method(Ts... args) {                                                           \
-        if (rcid < 0)                                                                           \
-            return this->$##_method(args...);                                                   \
-        using ResT = decltype(this->$##_method(args...));                                       \
-        if constexpr (not std::is_void_v<ResT>) {                                               \
-            ResT res {};                                                                           \
-            ((static_cast<Derived*>(this)->cid == Derived::scid                                 \
-                     ? (_call_impl_##_method<Derived>(&res, args...), rcid = Derived::scid)     \
-                     : false)                                                                   \
-                || ...);                                                                        \
-            if (rcid) {                                                                         \
-                return res;                                                                     \
-            }                                                                                   \
-            rcid = -1;                                                                          \
-            return this->$##_method(args...);                                                   \
-        } else {                                                                                \
-            ((static_cast<Derived*>(this)->cid == Derived::scid                                 \
-                     ? (_call_impl_##_method<Derived>((void*)0, args...), rcid = Derived::scid) \
-                     : false)                                                                   \
-                || ...);                                                                        \
-            if (not rcid) {                                                                     \
-                rcid = -1;                                                                      \
-                this->$##_method(args...);                                                      \
-            }                                                                                   \
-        }                                                                                       \
-    }                                                                                           \
+#define __dispatch(_method)                                                                                           \
+public:                                                                                                               \
+    __dispatch_case(_method);                                                                                         \
+    template <typename... Ts>                                                                                         \
+    inline auto _method(Ts... args) {                                                                                 \
+        if (_is_base_inst) {                                                                                          \
+            return this->$##_method(args...);                                                                         \
+        }                                                                                                             \
+        using ResT = decltype(this->$##_method(args...));                                                             \
+        if constexpr (not std::is_void_v<ResT>) {                                                                     \
+            ResT res {};                                                                                              \
+            _is_base_inst = not((static_cast<Derived*>(this)->cid == Derived::scid                                    \
+                                        ? (_call_impl_##_method<Derived>(&res, args...), _is_derived_inst = true)     \
+                                        : false)                                                                      \
+                || ...);                                                                                              \
+            if (_is_base_inst) {                                                                                      \
+                return this->$##_method(args...);                                                                     \
+            }                                                                                                         \
+            return res;                                                                                               \
+        } else {                                                                                                      \
+            _is_base_inst = not((static_cast<Derived*>(this)->cid == Derived::scid                                    \
+                                        ? (_call_impl_##_method<Derived>((void*)0, args...), _is_derived_inst = true) \
+                                        : false)                                                                      \
+                || ...);                                                                                              \
+            if (_is_base_inst) {                                                                                      \
+                this->$##_method(args...);                                                                            \
+            }                                                                                                         \
+        }                                                                                                             \
+    }                                                                                                                 \
     __end_of_method__
 
 #define PARENS ()

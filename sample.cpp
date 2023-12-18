@@ -1,4 +1,4 @@
-#include "poly_v7.hpp"
+#include "poly.hpp"
 #include <iostream>
 #include <vector>
 
@@ -152,6 +152,7 @@ int main() {
     std::cout << pack[2]->mul(111, 222) << std::endl;
     std::cout << pack[3]->mul(111, 222) << std::endl;
 
+    std::cout << "There must be an exception -> ";
     std::cout << std::endl << pack[0]->mul(111, 222) << std::endl;
 
     return 0;

@@ -1,4 +1,4 @@
-#include "poly.hpp"
+#include "poly_v7.hpp"
 #include <algorithm>
 #include <cassert>
 #include <chrono>
@@ -10,291 +10,220 @@
 
 using namespace poly;
 
-class PolyChildA;
-class PolyChildB;
-class PolyChildC;
-class PolyChildD;
-
 __base__ class PolyBase {
     __polymorphic__;
-    __dispatch(sum_arity5);
-    __dispatch(mul_arity3);
-    __dispatch(echo_acc);
+    __dispatch(func_arity5f);
+    __dispatch(func_arity3rf);
+    __dispatch(func_arity2f);
+    __dispatch(func_arity1f);
+    __dispatch(func_arity0);
     __dispatch(get_acc);
 
 public:
-    long acc_base = 0;
+    float acc_base = 0;
 
-    float $sum_arity5(float a0, float a1, float a2, float a3, float a4) {
-        auto sum = a0 + a1 + a2 + a3 + a4;
-        acc_base += sum;
-        return sum;
+    float $func_arity5f(float a0, float a1, float a2, float a3, float a4) {
+        auto y = (a0 + a1 + a2 - a3) / (a4 + 1);
+        acc_base += y;
+        return y;
     }
 
-    float $mul_arity3(float a0, float a1, float a2) {
-        auto mul = a0 * a1 * a2;
-        acc_base /= mul;
-        return mul;
+    float $func_arity3rf(float& a0, float& a1, float& a2) {
+        auto y = (a0 + a1 + a2) / (a2 + 1);
+        acc_base -= y;
+        return y;
     }
 
-    void $echo_acc() {
-        std::cout << __PRETTY_FUNCTION__ << ": " << acc_base << std::endl;
+    float $func_arity2f(float a0, float a1) {
+        auto y = a0 / (a1 + 1);
+        acc_base -= y;
+        return y;
     }
 
-    long $get_acc() {
+    float $func_arity1f(float a0) {
+        auto y = a0 * 2;
+        acc_base -= y;
+        return y;
+    }
+
+    float $func_arity0() {
+        auto y = acc_base / 5;
+        acc_base -= y;
+        return y;
+    }
+
+    float $get_acc() {
         return acc_base;
     }
 };
 
-class PolyChildA : public PolyBase<PolyChildA, PolyChildB, PolyChildC, PolyChildD> {
-    __implementation__;
+#define PolyBaseCRTP PolyBase< \
+    PolyChild<1>,              \
+    PolyChild<2>,              \
+    PolyChild<3>,              \
+    PolyChild<4>,              \
+    PolyChild<5>,              \
+    PolyChild<6>,              \
+    PolyChild<7>,              \
+    PolyChild<8>,              \
+    PolyChild<9>,              \
+    PolyChild<10>>
+
+template <int x>
+class PolyChild;
+
+template <int x>
+class PolyChild : public PolyBaseCRTP {
+    __implementation(x);
 
 public:
-    long acc_child_a = 0;
+    float acc_child_a = 0;
 
-    float sum_arity5(float a0, float a1, float a2, float a3, float a4) {
-        auto sum = a0 + a1 + a2 + a3 + a4;
-        acc_child_a += sum;
-        return sum;
+    float func_arity5f(float a0, float a1, float a2, float a3, float a4) {
+        auto y = (a0 + a1 + a2 - a3) / (a4 + 1);
+        acc_child_a += y;
+        return y;
     }
 
-    float mul_arity3(float a0, float a1, float a2) {
-        auto mul = a0 * a1 * a2;
-        acc_child_a /= mul;
-        return mul;
+    float func_arity3rf(float& a0, float& a1, float& a2) {
+        auto y = (a0 + a1 + a2) / (a2 + 1);
+        acc_child_a -= y;
+        return y;
     }
 
-    void echo_acc() {
-        std::cout << __PRETTY_FUNCTION__ << ": " << acc_child_a << std::endl;
+    float func_arity2f(float a0, float a1) {
+        auto y = a0 / (a1 + 1);
+        acc_child_a -= y;
+        return y;
     }
 
-    long get_acc() {
+    float func_arity1f(float a0) {
+        auto y = a0 * 2;
+        acc_child_a -= y;
+        return y;
+    }
+
+    float func_arity0() {
+        auto y = acc_child_a / 5;
+        acc_child_a -= y;
+        return y;
+    }
+
+    float get_acc() {
         return acc_child_a;
-    }
-};
-
-class PolyChildB : public PolyBase<PolyChildA, PolyChildB, PolyChildC, PolyChildD> {
-    __implementation__;
-
-public:
-    long acc_child_b = 0;
-
-    float sum_arity5(float a0, float a1, float a2, float a3, float a4) {
-        auto sum = a0 + a1 + a2 + a3 + a4;
-        acc_child_b += sum;
-        return sum;
-    }
-
-    float mul_arity3(float a0, float a1, float a2) {
-        auto mul = a0 * a1 * a2;
-        acc_child_b /= mul;
-        return mul;
-    }
-
-    void echo_acc() {
-        std::cout << __PRETTY_FUNCTION__ << ": " << acc_child_b << std::endl;
-    }
-
-    long get_acc() {
-        return acc_child_b;
-    }
-};
-
-class PolyChildC : public PolyBase<PolyChildA, PolyChildB, PolyChildC, PolyChildD> {
-    __implementation__;
-
-public:
-    long acc_child_c = 0;
-
-    float sum_arity5(float a0, float a1, float a2, float a3, float a4) {
-        auto sum = a0 + a1 + a2 + a3 + a4;
-        acc_child_c += sum;
-        return sum;
-    }
-
-    float mul_arity3(float a0, float a1, float a2) {
-        auto mul = a0 * a1 * a2;
-        acc_child_c /= mul;
-        return mul;
-    }
-
-    void echo_acc() {
-        std::cout << __PRETTY_FUNCTION__ << ": " << acc_child_c << std::endl;
-    }
-
-    long get_acc() {
-        return acc_child_c;
-    }
-};
-
-class PolyChildD : public PolyBase<PolyChildA, PolyChildB, PolyChildC, PolyChildD> {
-    __implementation__;
-
-public:
-    long acc_child_d = 0;
-
-    float sum_arity5(float a0, float a1, float a2, float a3, float a4) {
-        auto sum = a0 + a1 + a2 + a3 + a4;
-        acc_child_d += sum;
-        return sum;
-    }
-
-    float mul_arity3(float a0, float a1, float a2) {
-        auto mul = a0 * a1 * a2;
-        acc_child_d /= mul;
-        return mul;
-    }
-
-    void echo_acc() {
-        std::cout << __PRETTY_FUNCTION__ << ": " << acc_child_d << std::endl;
-    }
-
-    long get_acc() {
-        return acc_child_d;
     }
 };
 
 class CppBase {
 public:
-    long acc_base = 0;
+    float acc_base = 0;
 
-    virtual float sum_arity5(float a0, float a1, float a2, float a3, float a4) {
-        auto sum = a0 + a1 + a2 + a3 + a4;
-        acc_base += sum;
-        return sum;
+    virtual float func_arity5f(float a0, float a1, float a2, float a3, float a4) {
+        auto y = (a0 + a1 + a2 - a3) / (a4 + 1);
+        acc_base += y;
+        return y;
     }
 
-    virtual float mul_arity3(float a0, float a1, float a2) {
-        auto mul = a0 * a1 * a2;
-        acc_base /= mul;
-        return mul;
+    virtual float func_arity3rf(float& a0, float& a1, float& a2) {
+        auto y = (a0 + a1 + a2) / (a2 + 1);
+        acc_base -= y;
+        return y;
     }
 
-    virtual void echo_acc() {
-        std::cout << __PRETTY_FUNCTION__ << ": " << acc_base << std::endl;
+    virtual float func_arity2f(float a0, float a1) {
+        auto y = a0 / (a1 + 1);
+        acc_base -= y;
+        return y;
     }
 
-    virtual long get_acc() {
+    virtual float func_arity1f(float a0) {
+        auto y = a0 * 2;
+        acc_base -= y;
+        return y;
+    }
+
+    virtual float func_arity0() {
+        auto y = acc_base / 5;
+        acc_base -= y;
+        return y;
+    }
+
+    virtual float get_acc() {
         return acc_base;
     }
 
     virtual ~CppBase() { }
 };
 
-class CppChildA : public CppBase {
+template <int x>
+class CppChild;
+
+template <int x>
+class CppChild : public CppBase {
 public:
-    long acc_child_a = 0;
+    float acc_child_a = 0;
 
-    float sum_arity5(float a0, float a1, float a2, float a3, float a4) override {
-        auto sum = a0 + a1 + a2 + a3 + a4;
-        acc_child_a += sum;
-        return sum;
+    float func_arity5f(float a0, float a1, float a2, float a3, float a4) override {
+        auto y = (a0 + a1 + a2 - a3) / (a4 + 1);
+        acc_child_a += y;
+        return y;
     }
 
-    float mul_arity3(float a0, float a1, float a2) override {
-        auto mul = a0 * a1 * a2;
-        acc_child_a /= mul;
-        return mul;
+    float func_arity3rf(float& a0, float& a1, float& a2) override {
+        auto y = (a0 + a1 + a2) / (a2 + 1);
+        acc_child_a -= y;
+        return y;
     }
 
-    void echo_acc() override {
-        std::cout << __PRETTY_FUNCTION__ << ": " << acc_child_a << std::endl;
+    float func_arity2f(float a0, float a1) override {
+        auto y = a0 / (a1 + 1);
+        acc_child_a -= y;
+        return y;
     }
 
-    long get_acc() override {
+    float func_arity1f(float a0) override {
+        auto y = a0 * 2;
+        acc_child_a -= y;
+        return y;
+    }
+
+    float func_arity0() override {
+        auto y = acc_child_a / 5;
+        acc_child_a -= y;
+        return y;
+    }
+
+    float get_acc() override {
         return acc_child_a;
     }
 };
 
-class CppChildB : public CppBase {
-public:
-    long acc_child_b = 0;
-
-    float sum_arity5(float a0, float a1, float a2, float a3, float a4) override {
-        auto sum = a0 + a1 + a2 + a3 + a4;
-        acc_child_b += sum;
-        return sum;
-    }
-
-    float mul_arity3(float a0, float a1, float a2) override {
-        auto mul = a0 * a1 * a2;
-        acc_child_b /= mul;
-        return mul;
-    }
-
-    void echo_acc() override {
-        std::cout << __PRETTY_FUNCTION__ << ": " << acc_child_b << std::endl;
-    }
-
-    long get_acc() override {
-        return acc_child_b;
-    }
-};
-
-class CppChildC : public CppBase {
-public:
-    long acc_child_c = 0;
-
-    float sum_arity5(float a0, float a1, float a2, float a3, float a4) override {
-        auto sum = a0 + a1 + a2 + a3 + a4;
-        acc_child_c += sum;
-        return sum;
-    }
-
-    float mul_arity3(float a0, float a1, float a2) override {
-        auto mul = a0 * a1 * a2;
-        acc_child_c /= mul;
-        return mul;
-    }
-
-    void echo_acc() override {
-        std::cout << __PRETTY_FUNCTION__ << ": " << acc_child_c << std::endl;
-    }
-
-    long get_acc() override {
-        return acc_child_c;
-    }
-};
-
-class CppChildD : public CppBase {
-public:
-    long acc_child_d = 0;
-
-    float sum_arity5(float a0, float a1, float a2, float a3, float a4) override {
-        auto sum = a0 + a1 + a2 + a3 + a4;
-        acc_child_d += sum;
-        return sum;
-    }
-
-    float mul_arity3(float a0, float a1, float a2) override {
-        auto mul = a0 * a1 * a2;
-        acc_child_d /= mul;
-        return mul;
-    }
-
-    void echo_acc() override {
-        std::cout << __PRETTY_FUNCTION__ << ": " << acc_child_d << std::endl;
-    }
-
-    long get_acc() override {
-        return acc_child_d;
-    }
-};
-
 void run_suit_cpp(std::vector<CppBase*>& pack, int N) {
+    float x = 5;
+    float y = 8;
+    float z = 9;
     for (int i = 0; i < N; ++i) {
         for (unsigned j = 0; j < pack.size(); ++j) {
-            pack[j]->sum_arity5(i + 0.0f, i + 1.0f, i + i * 2.0f, i + i * 3.0f, i + 4.0f);
-            pack[j]->mul_arity3(1.0f, 1.0f, 2.0f);
+            pack[j]->func_arity5f(i + 1.0f, i - 1.0f, i - 1.0f, i + 1.0f, i + 1.0f);
+            pack[j]->func_arity3rf(x, y, z);
+            pack[j]->func_arity2f(i + 1.0f, i + 1.0f);
+            pack[j]->func_arity1f(i + 1.0f);
+            pack[j]->func_arity0();
         }
     }
 }
 
-void run_suit_poly(std::vector<PolyBase<PolyChildA, PolyChildB, PolyChildC, PolyChildD>*>& pack, int N) {
+void run_suit_poly(std::vector<PolyBaseCRTP*>& pack, int N) {
+    float x = 5;
+    float y = 8;
+    float z = 9;
     for (int i = 0; i < N; ++i) {
         for (unsigned j = 0; j < pack.size(); ++j) {
-            pack[j]->sum_arity5(i + 0.0f, i + 1.0f, i + i * 2.0f, i + i * 3.0f, i + 4.0f);
-            pack[j]->mul_arity3(1.0f, 1.0f, 2.0f);
+            pack[j]->func_arity5f(i + 1.0f, i - 1.0f, i - 1.0f, i + 1.0f, i + 1.0f);
+            pack[j]->func_arity3rf(x, y, z);
+            pack[j]->func_arity2f(i + 1.0f, i + 1.0f);
+            pack[j]->func_arity1f(i + 1.0f);
+            pack[j]->func_arity0();
         }
     }
 }
@@ -316,34 +245,34 @@ int main() {
     int M = 10e+3;
     auto rng = std::default_random_engine {};
 
-    using PolyBase = PolyBase<PolyChildA, PolyChildB, PolyChildC, PolyChildD>;
-
-    auto poly_base = new PolyBase();
-    auto poly_child_a = new PolyChildA();
-    auto poly_child_b = new PolyChildB();
-    auto poly_child_c = new PolyChildC();
-    auto poly_child_d = new PolyChildC();
+    using PolyBase = PolyBaseCRTP;
 
     std::vector<PolyBase*> poly_pack = {
-        poly_base,
-        (static_cast<PolyBase*>(poly_child_a)),
-        (static_cast<PolyBase*>(poly_child_c)),
-        (static_cast<PolyBase*>(poly_child_b)),
-        (static_cast<PolyBase*>(poly_child_d))
+        new PolyBase(),
+        new PolyChild<1>(),
+        new PolyChild<2>(),
+        new PolyChild<3>(),
+        new PolyChild<4>(),
+        new PolyChild<5>(),
+        new PolyChild<6>(),
+        new PolyChild<7>(),
+        new PolyChild<8>(),
+        new PolyChild<9>(),
+        new PolyChild<10>()
     };
 
-    auto cpp_base = new CppBase();
-    auto cpp_child_a = new CppChildA();
-    auto cpp_child_b = new CppChildB();
-    auto cpp_child_c = new CppChildC();
-    auto cpp_child_d = new CppChildD();
-
     std::vector<CppBase*> cpp_pack = {
-        cpp_base,
-        (static_cast<CppBase*>(cpp_child_a)),
-        (static_cast<CppBase*>(cpp_child_c)),
-        (static_cast<CppBase*>(cpp_child_b)),
-        (static_cast<CppBase*>(cpp_child_d))
+        new CppBase(),
+        new CppChild<1>(),
+        new CppChild<2>(),
+        new CppChild<3>(),
+        new CppChild<4>(),
+        new CppChild<5>(),
+        new CppChild<6>(),
+        new CppChild<7>(),
+        new CppChild<8>(),
+        new CppChild<9>(),
+        new CppChild<10>()
     };
 
     double poly_time = 0;
@@ -364,6 +293,10 @@ int main() {
     std::cout << std::format("Poly: {:.5f}ms (total), {:.5f}ms (avg)\n", poly_time, poly_time / (N * M));
     std::cout << std::format("CPP:  {:.5f}ms (total), {:.5f}ms (avg)\n", cpp_time, cpp_time / (N * M));
     std::cout << std::format("CPP / Poly = {:.3f}\n", cpp_time / poly_time);
+
+    for (unsigned i = 0; i < cpp_pack.size(); ++i) {
+        assert(std::fabs(cpp_pack[i]->get_acc() - poly_pack[i]->get_acc()) < 10e-3);
+    }
 
     for (auto obj : cpp_pack) {
         delete obj;

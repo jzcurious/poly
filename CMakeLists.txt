@@ -7,9 +7,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Ofast -Wno-dollar-in-id
 set(
     SHARED_SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/poly.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/poly_v3.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/poly_v4.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/poly_v5.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/poly_v7.hpp
 )
 
 set(
