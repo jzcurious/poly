@@ -18,6 +18,11 @@ TEST(FlatInhTests, all_implemented) {
   EXPECT_NE(base->get_id(), child_a_->get_id());
   EXPECT_NE(base->get_id(), child_b_->get_id());
   EXPECT_NE(base->get_id(), child_c_->get_id());
+
+  delete base;
+  delete child_a;
+  delete child_b;
+  delete child_c;
 }
 
 TEST(FlatInhTests, not_impemented_in_derived) {
@@ -37,6 +42,11 @@ TEST(FlatInhTests, not_impemented_in_derived) {
   EXPECT_EQ(base->f1(), child_a_->f1());
   EXPECT_EQ(base->f1(), child_b_->f1());
   EXPECT_EQ(base->f1(), child_c_->f1());
+
+  delete base;
+  delete child_a;
+  delete child_b;
+  delete child_c;
 }
 
 TEST(FlatInhTests, abstract) {
@@ -57,4 +67,9 @@ TEST(FlatInhTests, abstract) {
   EXPECT_THROW(base->f2(2, 2), std::logic_error);
   EXPECT_THROW(child_b_->f2(2, 2), std::logic_error);
   EXPECT_THROW(child_c_->f2(2, 2), std::logic_error);
+
+  delete base;
+  delete child_a;
+  delete child_b;
+  delete child_c;
 }

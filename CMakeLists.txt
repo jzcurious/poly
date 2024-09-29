@@ -7,4 +7,4 @@ set(CMAKE_CUDA_STANDARD 20)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -O3 -Wno-array-bounds")
 
 add_subdirectory(tests)
-# add_subdirectory(benchmarks)
+add_subdirectory(benchmarks)
