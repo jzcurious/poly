@@ -4,14 +4,14 @@ The implementation of polymorphism without vtables
 
 ### Benchmark result
 
-Running ./poly-benchmarks
-Run on (4 X 2500.02 MHz CPU s)
-CPU Caches:
-L1 Data 32 KiB (x2)
-L1 Instruction 32 KiB (x2)
-L2 Unified 256 KiB (x2)
-L3 Unified 3072 KiB (x1)
-Load Average: 1.05, 2.01, 2.81
+Running ./poly-benchmarks \
+Run on (4 X 2500.02 MHz CPU s) \
+CPU Caches: \
+L1 Data 32 KiB (x2) \
+L1 Instruction 32 KiB (x2) \
+L2 Unified 256 KiB (x2) \
+L3 Unified 3072 KiB (x1) \
+Load Average: 1.05, 2.01, 2.81\
 
 | Benchmark         | Time       | CPU        | Iterations |
 | ----------------- | ---------- | ---------- | ---------- |
