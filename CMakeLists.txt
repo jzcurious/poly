@@ -1,35 +1,10 @@
-cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
-project (poly)
+cmake_minimum_required(VERSION 3.24...3.30)
+project(poly VERSION 1.0.0 LANGUAGES CXX)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Ofast -Wno-dollar-in-identifier-extension")
+set(CMAKE_CUDA_STANDARD 20)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -O3 -Wno-array-bounds")
 
-set(
-    SHARED_SOURCE_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/poly.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/poly_v7.hpp
-)
-
-set(
-    DEV_SOURCE_FILES
-    ${SHARED_SOURCE_FILES}
-    ${CMAKE_CURRENT_SOURCE_DIR}/poly_dev.cpp
-)
-
-set(
-    BENCHMARK_SOURCE_FILES
-    ${SHARED_SOURCE_FILES}
-    ${CMAKE_CURRENT_SOURCE_DIR}/benchmark.cpp
-)
-
-add_executable(poly_dev ${DEV_SOURCE_FILES})
-target_include_directories(
-    poly_dev PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
-)
-
-add_executable(benchmark ${BENCHMARK_SOURCE_FILES})
-target_include_directories(
-    benchmark PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
-)
+add_subdirectory(tests)
+# add_subdirectory(benchmarks)
