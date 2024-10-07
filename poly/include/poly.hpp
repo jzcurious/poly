@@ -1,127 +1,124 @@
 #ifndef _POLY_HPP_
 #define _POLY_HPP_
 
-#include <stdexcept>
+#include <concepts>
+#include <type_traits>
 
 namespace poly {
 
-template <class D>
-concept has_cid = requires(D d) { d.cid; };
+template <class T>
+concept poly_compatible = requires(T x) {
+  x.poly_cid;
+  T::poly_scid;
+};
 
-using cid_t = long int;
+using poly_cid_t = int;
+
 #define __generate_cid() __LINE__ + 1
 
-#define __base__         template <class... Derived>
-
-#define __implementation__                                                               \
+#define __poly_enable()                                                                  \
                                                                                          \
  public:                                                                                 \
-  static constexpr const cid_t scid = __generate_cid();                                  \
-  const cid_t cid = scid
+  static constexpr const poly_cid_t poly_scid = __generate_cid();                        \
+  const poly_cid_t poly_cid = poly_scid
 
-#define __implementation(_cid)                                                           \
-                                                                                         \
- public:                                                                                 \
-  static constexpr const cid_t scid = _cid;                                              \
-  const cid_t cid = _cid
+namespace detail {
 
-#define __polymorphic__                                                                  \
-                                                                                         \
- public:                                                                                 \
-  static constexpr cid_t scid = __generate_cid();                                        \
-  const cid_t cid = scid;                                                                \
-                                                                                         \
- private:                                                                                \
-  bool _is_base_inst = false;                                                            \
-  bool _is_derived_inst = true
+template <class F, class... ArgTs>
+constexpr bool invocable_non_void_return
+    = std::invocable<F, ArgTs...>
+      and not std::is_void_v<std::invoke_result_t<F, ArgTs...>>;
 
-#define __end_of_method__ static_assert(true, "")
+template <class F, class... ArgTs>
+constexpr bool invocable_void_return
+    = std::invocable<F, ArgTs...> and std::is_void_v<std::invoke_result_t<F, ArgTs...>>;
 
-#define __dispatch_case(_method)                                                         \
-  template <typename DerivedT, typename ResT, typename... ArgsT>                         \
-  inline void _call_impl_##_method(ResT* res, ArgsT&... args)                            \
-    requires has_cid<DerivedT>                                                           \
-  {                                                                                      \
-    using B = std::remove_reference<decltype(*this)>::type;                              \
-    using M = decltype(&B::$##_method);                                                  \
-    constexpr bool overrided                                                             \
-        = static_cast<M>(&B::_method) != static_cast<M>(&DerivedT::_method);             \
-    constexpr bool procedural = std::is_same_v<ResT*, void*>;                            \
-    if constexpr (overrided and procedural) {                                            \
-      static_cast<DerivedT*>(this)->_method(args...);                                    \
-    }                                                                                    \
-    if constexpr (overrided and not procedural) {                                        \
-      *res = static_cast<DerivedT*>(this)->_method(args...);                             \
-    }                                                                                    \
-    if constexpr (not overrided and procedural) {                                        \
-      this->$##_method(args...);                                                         \
-    }                                                                                    \
-    if constexpr (not overrided and not procedural) {                                    \
-      *res = this->$##_method(args...);                                                  \
-    }                                                                                    \
+template <poly_compatible Base, poly_compatible... Derived>
+struct PolyGroup : public Base {
+  int cidof(const Base* ptr) const {
+    poly_cid_t poly_cid = Base::poly_scid;
+    ((static_cast<const Derived*>(ptr)->poly_cid == Derived::poly_scid
+             ? poly_cid = Derived::poly_scid
+             : 0),
+        ...);
+    return poly_cid;
+  }
+};
+
+}  // namespace detail
+
+#define __dispatch(_mfunc)                                                               \
+  template <class... ArgTs>                                                              \
+    requires detail::invocable_void_return<decltype(&Base::_mfunc), Base, ArgTs...>      \
+  void dispatch_##_mfunc(const Base* ptr, ArgTs&&... args) const {                       \
+    bool found = false;                                                                  \
+    ((static_cast<const Derived*>(ptr)->poly_cid == Derived::poly_scid                   \
+             ? (static_cast<const Derived*>(ptr)->_mfunc(std::forward<ArgTs>(args)...),  \
+                   found = true)                                                         \
+             : false),                                                                   \
+        ...);                                                                            \
+    if (not found) ptr->_mfunc(args...);                                                 \
   }                                                                                      \
-  __end_of_method__
-
-#define __dispatch(_method)                                                              \
                                                                                          \
- public:                                                                                 \
-  __dispatch_case(_method);                                                              \
-  template <typename... Ts>                                                              \
-  inline auto _method(Ts... args) {                                                      \
-    if (_is_base_inst) {                                                                 \
-      return this->$##_method(args...);                                                  \
-    }                                                                                    \
-    using ResT = decltype(this->$##_method(args...));                                    \
-    if constexpr (not std::is_void_v<ResT>) {                                            \
-      ResT res{};                                                                        \
-      _is_base_inst = not((static_cast<Derived*>(this)->cid == Derived::scid             \
-                                  ? (_call_impl_##_method<Derived>(&res, args...),       \
-                                        _is_derived_inst = true)                         \
-                                  : false)                                               \
-                          || ...);                                                       \
-      if (_is_base_inst) {                                                               \
-        return this->$##_method(args...);                                                \
-      }                                                                                  \
-      return res;                                                                        \
-    } else {                                                                             \
-      _is_base_inst = not((static_cast<Derived*>(this)->cid == Derived::scid             \
-                                  ? (_call_impl_##_method<Derived>((void*)0, args...),   \
-                                        _is_derived_inst = true)                         \
-                                  : false)                                               \
-                          || ...);                                                       \
-      if (_is_base_inst) {                                                               \
-        this->$##_method(args...);                                                       \
-      }                                                                                  \
-    }                                                                                    \
+  template <class... ArgTs>                                                              \
+    requires detail::invocable_non_void_return<decltype(&Base::_mfunc), Base, ArgTs...>  \
+  auto dispatch_##_mfunc(const Base* ptr, ArgTs&&... args) const {                       \
+    std::invoke_result_t<decltype(&Base::_mfunc), Base, ArgTs...> result;                \
+    bool found = false;                                                                  \
+    ((static_cast<const Derived*>(ptr)->poly_cid == Derived::poly_scid                   \
+             ? (result = static_cast<const Derived*>(ptr)->_mfunc(                       \
+                    std::forward<ArgTs>(args)...),                                       \
+                   found = true)                                                         \
+             : false),                                                                   \
+        ...);                                                                            \
+    if (not found)                                                                       \
+      return ptr->_mfunc(args...);                                                       \
+    else                                                                                 \
+      return result;                                                                     \
   }                                                                                      \
-  __end_of_method__
-
-#define PARENS                ()
-
-#define EXPAND(...)           EXPAND4(EXPAND4(EXPAND4(EXPAND4(__VA_ARGS__))))
-#define EXPAND4(...)          EXPAND3(EXPAND3(EXPAND3(EXPAND3(__VA_ARGS__))))
-#define EXPAND3(...)          EXPAND2(EXPAND2(EXPAND2(EXPAND2(__VA_ARGS__))))
-#define EXPAND2(...)          EXPAND1(EXPAND1(EXPAND1(EXPAND1(__VA_ARGS__))))
-#define EXPAND1(...)          __VA_ARGS__
-
-#define FOR_EACH(_macro, ...) __VA_OPT__(EXPAND(FOR_EACH_HELPER(_macro, __VA_ARGS__)))
-
-#define FOR_EACH_HELPER(_macro, _a1, ...)                                                \
-  _macro(_a1) __VA_OPT__(, FOR_EACH_AGAIN PARENS(_macro, __VA_ARGS__))
-
-#define FOR_EACH_AGAIN() FOR_EACH_HELPER
-
-#define __unused_arg(_a) [[maybe_unused]] _a
-
-#define __abstract_call_msg__                                                            \
-  std::string("Calling the abstract method \"") + __PRETTY_FUNCTION__ + "\" is prohibited"
-
-#define __abstract(_name, _ret, ...)                                                     \
-  [[maybe_unused]] _ret $##_name(FOR_EACH(__unused_arg, __VA_ARGS__)) {                  \
-    throw std::logic_error(__abstract_call_msg__);                                       \
-    return _ret{};                                                                       \
+                                                                                         \
+  template <class... ArgTs>                                                              \
+    requires detail::invocable_void_return<decltype(&Base::_mfunc), Base, ArgTs...>      \
+  void dispatch_##_mfunc(Base* ptr, ArgTs&&... args) {                                   \
+    bool found = false;                                                                  \
+    ((static_cast<Derived*>(ptr)->poly_cid == Derived::poly_scid                         \
+             ? (static_cast<Derived*>(ptr)->_mfunc(std::forward<ArgTs>(args)...),        \
+                   found = true)                                                         \
+             : false),                                                                   \
+        ...);                                                                            \
+    if (not found) ptr->_mfunc(args...);                                                 \
   }                                                                                      \
-  __end_of_method__
+                                                                                         \
+  template <class... ArgTs>                                                              \
+    requires detail::invocable_non_void_return<decltype(&Base::_mfunc), Base, ArgTs...>  \
+  auto dispatch_##_mfunc(Base* ptr, ArgTs&&... args) {                                   \
+    std::invoke_result_t<decltype(&Base::_mfunc), Base, ArgTs...> result;                \
+    bool found = false;                                                                  \
+    ((static_cast<Derived*>(ptr)->poly_cid == Derived::poly_scid                         \
+             ? (result                                                                   \
+                   = static_cast<Derived*>(ptr)->_mfunc(std::forward<ArgTs>(args)...),   \
+                   found = true)                                                         \
+             : false),                                                                   \
+        ...);                                                                            \
+    if (not found)                                                                       \
+      return ptr->_mfunc(args...);                                                       \
+    else                                                                                 \
+      return result;                                                                     \
+  }                                                                                      \
+                                                                                         \
+  template <class... ArgTs>                                                              \
+  auto _mfunc(ArgTs&&... args) const {                                                   \
+    return dispatch_##_mfunc(this, std::forward<ArgTs>(args)...);                        \
+  }                                                                                      \
+                                                                                         \
+  template <class... ArgTs>                                                              \
+  auto _mfunc(ArgTs&&... args) {                                                         \
+    return dispatch_##_mfunc(this, std::forward<ArgTs>(args)...);                        \
+  }
+
+#define __poly_decl_group(_name, _dispatchers)                                           \
+  template <poly_compatible Base, poly_compatible... Derived>                            \
+  struct _name : public detail::PolyGroup<Base, Derived...> _dispatchers
 
 }  // namespace poly
 

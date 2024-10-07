@@ -5,71 +5,50 @@
 
 using namespace poly;
 
-__base__ class PolyBase {
-  __polymorphic__;
-  __dispatch(func_arity5f);
-  __dispatch(func_arity3rf);
-  __dispatch(func_arity2f);
-  __dispatch(func_arity1f);
-  __dispatch(func_arity0);
-  __dispatch(get_acc);
+class PolyBase {
+  __poly_enable();
 
  public:
   float acc_base = 0;
 
-  float $func_arity5f(float a0, float a1, float a2, float a3, float a4) {
+  float func_arity5f(float a0, float a1, float a2, float a3, float a4) {
     auto y = (a0 + a1 + a2 - a3) / (a4 + 1);
     acc_base += y;
     return y;
   }
 
-  float $func_arity3rf(float& a0, float& a1, float& a2) {
+  float func_arity3f(float& a0, float& a1, float& a2) {
     auto y = (a0 + a1 + a2) / (a2 + 1);
     acc_base -= y;
     return y;
   }
 
-  float $func_arity2f(float a0, float a1) {
+  float func_arity2f(float a0, float a1) {
     auto y = a0 / (a1 + 1);
     acc_base -= y;
     return y;
   }
 
-  float $func_arity1f(float a0) {
+  float func_arity1f(float a0) {
     auto y = a0 * 2;
     acc_base -= y;
     return y;
   }
 
-  float $func_arity0() {
+  float func_arity0() {
     auto y = acc_base / 5;
     acc_base -= y;
     return y;
   }
 
-  float $get_acc() {
+  float get_acc() {
     return acc_base;
   }
 };
 
-#define PolyBaseCRTP                                                                     \
-  PolyBase<PolyChild<1>,                                                                 \
-      PolyChild<2>,                                                                      \
-      PolyChild<3>,                                                                      \
-      PolyChild<4>,                                                                      \
-      PolyChild<5>,                                                                      \
-      PolyChild<6>,                                                                      \
-      PolyChild<7>,                                                                      \
-      PolyChild<8>,                                                                      \
-      PolyChild<9>,                                                                      \
-      PolyChild<10>>
-
 template <int x>
-class PolyChild;
-
-template <int x>
-class PolyChild : public PolyBaseCRTP {
-  __implementation(x);
+class PolyChild : public PolyBase {
+  __poly_enable();
 
  public:
   float acc_child_a = 0;
@@ -80,7 +59,7 @@ class PolyChild : public PolyBaseCRTP {
     return y;
   }
 
-  float func_arity3rf(float& a0, float& a1, float& a2) {
+  float func_arity3f(float& a0, float& a1, float& a2) {
     auto y = (a0 + a1 + a2) / (a2 + 1);
     acc_child_a -= y;
     return y;
@@ -119,7 +98,7 @@ class CppBase {
     return y;
   }
 
-  virtual float func_arity3rf(float& a0, float& a1, float& a2) {
+  virtual float func_arity3f(float& a0, float& a1, float& a2) {
     auto y = (a0 + a1 + a2) / (a2 + 1);
     acc_base -= y;
     return y;
@@ -151,9 +130,6 @@ class CppBase {
 };
 
 template <int x>
-class CppChild;
-
-template <int x>
 class CppChild : public CppBase {
  public:
   float acc_child_a = 0;
@@ -164,7 +140,7 @@ class CppChild : public CppBase {
     return y;
   }
 
-  float func_arity3rf(float& a0, float& a1, float& a2) override {
+  float func_arity3f(float& a0, float& a1, float& a2) override {
     auto y = (a0 + a1 + a2) / (a2 + 1);
     acc_child_a -= y;
     return y;
@@ -201,7 +177,7 @@ void call_all_methods_n_times(std::vector<T*>& objects) {
   for (size_t i = 0; i < n; ++i) {
     for (size_t j = 0; j < objects.size(); ++j) {
       objects[j]->func_arity5f(i + 1.0f, i - 1.0f, i - 1.0f, i + 1.0f, i + 1.0f);
-      objects[j]->func_arity3rf(x, y, z);
+      objects[j]->func_arity3f(x, y, z);
       objects[j]->func_arity2f(i + 1.0f, i + 1.0f);
       objects[j]->func_arity1f(i + 1.0f);
       objects[j]->func_arity0();
@@ -235,22 +211,42 @@ static void bench_cpp(benchmark::State& state) {
   }
 }
 
-static void bench_poly(benchmark::State& state) {
-  using PolyBase = PolyBaseCRTP;
+__poly_decl_group(Group, {
+  __dispatch(func_arity5f);
+  __dispatch(func_arity3f);
+  __dispatch(func_arity2f);
+  __dispatch(func_arity1f);
+  __dispatch(func_arity0);
+  __dispatch(get_acc);
+});
 
+static void bench_poly(benchmark::State& state) {
   // clang-format off
-  std::vector<PolyBase*> objects = {
-      new PolyBase(),
-      new PolyChild<1>(),
-      new PolyChild<2>(),
-      new PolyChild<3>(),
-      new PolyChild<4>(),
-      new PolyChild<5>(),
-      new PolyChild<6>(),
-      new PolyChild<7>(),
-      new PolyChild<8>(),
-      new PolyChild<9>(),
-      new PolyChild<10>()
+  using group_t = Group<
+      PolyBase,
+      PolyChild<1>,
+      PolyChild<2>,
+      PolyChild<3>,
+      PolyChild<4>,
+      PolyChild<5>,
+      PolyChild<6>,
+      PolyChild<7>,
+      PolyChild<8>,
+      PolyChild<9>,
+      PolyChild<10>>;
+
+  std::vector<group_t*> objects = {
+      static_cast<group_t*>(new PolyBase()),
+      static_cast<group_t*>(static_cast<PolyBase*>(new PolyChild<1>())),
+      static_cast<group_t*>(static_cast<PolyBase*>(new PolyChild<2>())),
+      static_cast<group_t*>(static_cast<PolyBase*>(new PolyChild<3>())),
+      static_cast<group_t*>(static_cast<PolyBase*>(new PolyChild<4>())),
+      static_cast<group_t*>(static_cast<PolyBase*>(new PolyChild<5>())),
+      static_cast<group_t*>(static_cast<PolyBase*>(new PolyChild<6>())),
+      static_cast<group_t*>(static_cast<PolyBase*>(new PolyChild<7>())),
+      static_cast<group_t*>(static_cast<PolyBase*>(new PolyChild<8>())),
+      static_cast<group_t*>(static_cast<PolyBase*>(new PolyChild<9>())),
+      static_cast<group_t*>(static_cast<PolyBase*>(new PolyChild<10>()))
   };
   // clang-format on
 
@@ -263,6 +259,6 @@ static void bench_poly(benchmark::State& state) {
   }
 }
 
-BENCHMARK(bench_poly);
 BENCHMARK(bench_cpp);
+BENCHMARK(bench_poly);
 BENCHMARK_MAIN();
