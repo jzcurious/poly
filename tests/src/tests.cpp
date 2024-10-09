@@ -1,74 +1,99 @@
-#include "flat.cpp"
+#include "classes.cpp"
 #include "poly.hpp"
 #include "gtest/gtest.h"
 
-__poly_decl_group(Group, {
-  __dispatch(get_id);
-  __dispatch(f1);
-});
+TEST(ExplicitTests, all_implemented) {
+  using namespace classes::explicit_style;
 
-using namespace flat;
-using group_t = Group<Base, ChildA, ChildB, ChildC>;
-
-TEST(FlatInhTests, all_implemented_const) {
   auto base = new Base();
-  auto child_a = new ChildA();
-  auto child_b = new ChildB();
-  auto child_c = new ChildC();
+  auto derived_a = new DerivedA();
+  auto derived_b = new DerivedB();
+  auto derived_c = new DerivedC();
 
-  auto child_a_ = static_cast<Base*>(child_a);
-  auto child_b_ = static_cast<Base*>(child_b);
-  auto child_c_ = static_cast<Base*>(child_c);
-
-  EXPECT_NE(base->get_id(), static_cast<group_t*>(child_a_)->get_id());
-  EXPECT_NE(base->get_id(), static_cast<group_t*>(child_b_)->get_id());
-  EXPECT_NE(base->get_id(), static_cast<group_t*>(child_c_)->get_id());
+  EXPECT_EQ(base->f2(), Dispatcher::dispatch_f2(base));
+  EXPECT_NE(base->f2(), Dispatcher::dispatch_f2(derived_a));
+  EXPECT_NE(base->f2(), Dispatcher::dispatch_f2(derived_b));
+  EXPECT_NE(base->f2(), Dispatcher::dispatch_f2(derived_c));
 
   delete base;
-  delete child_a;
-  delete child_b;
-  delete child_c;
+  delete derived_a;
+  delete derived_b;
+  delete derived_c;
 }
 
-// TEST(FlatInhTests, not_impemented_in_derived_const) {
+TEST(ExplicitTests, all_implemented_const) {
+  using namespace classes::explicit_style;
 
-//   auto base = new Base();
-//   auto child_a = new ChildA();
-//   auto child_b = new ChildB();
-//   auto child_c = new ChildC();
+  auto base = new Base();
+  auto derived_a = new DerivedA();
+  auto derived_b = new DerivedB();
+  auto derived_c = new DerivedC();
 
-//   auto child_a_ = static_cast<Base*>(child_a);
-//   auto child_b_ = static_cast<Base*>(child_b);
-//   auto child_c_ = static_cast<Base*>(child_c);
+  EXPECT_EQ(base->get_id(), Dispatcher::dispatch_get_id(base));
+  EXPECT_NE(base->get_id(), Dispatcher::dispatch_get_id(derived_a));
+  EXPECT_NE(base->get_id(), Dispatcher::dispatch_get_id(derived_b));
+  EXPECT_NE(base->get_id(), Dispatcher::dispatch_get_id(derived_c));
 
-//   EXPECT_EQ(base->f1(), child_a_->f1());
-//   EXPECT_EQ(base->f1(), child_b_->f1());
-//   EXPECT_EQ(base->f1(), child_c_->f1());
+  delete base;
+  delete derived_a;
+  delete derived_b;
+  delete derived_c;
+}
 
-//   delete base;
-//   delete child_a;
-//   delete child_b;
-//   delete child_c;
-// }
+TEST(ExplicitTests, not_impemented_in_derived) {
+  using namespace classes::explicit_style;
 
-// TEST(FlatInhTests, abstract) {
+  auto base = new Base();
+  auto derived_a = new DerivedA();
+  auto derived_b = new DerivedB();
+  auto derived_c = new DerivedC();
 
-//   auto base = new Base();
-//   auto child_a = new ChildA();
-//   auto child_b = new ChildB();
-//   auto child_c = new ChildC();
+  EXPECT_EQ(base->f3(), Dispatcher::dispatch_f3(base));
+  EXPECT_EQ(base->f3(), Dispatcher::dispatch_f3(derived_a));
+  EXPECT_EQ(base->f3(), Dispatcher::dispatch_f3(derived_b));
+  EXPECT_EQ(base->f3(), Dispatcher::dispatch_f3(derived_c));
 
-//   auto child_a_ = static_cast<Base*>(child_a);
-//   auto child_b_ = static_cast<Base*>(child_b);
-//   auto child_c_ = static_cast<Base*>(child_c);
+  delete base;
+  delete derived_a;
+  delete derived_b;
+  delete derived_c;
+}
 
-//   EXPECT_EQ(child_a_->f2(2, 2), 4);
-//   EXPECT_THROW(base->f2(2, 2), std::logic_error);
-//   EXPECT_THROW(child_b_->f2(2, 2), std::logic_error);
-//   EXPECT_THROW(child_c_->f2(2, 2), std::logic_error);
+TEST(ExplicitTests, not_impemented_in_derived_const) {
+  using namespace classes::explicit_style;
 
-//   delete base;
-//   delete child_a;
-//   delete child_b;
-//   delete child_c;
-// }
+  auto base = new Base();
+  auto derived_a = new DerivedA();
+  auto derived_b = new DerivedB();
+  auto derived_c = new DerivedC();
+
+  EXPECT_EQ(base->f1(), Dispatcher::dispatch_f1(base));
+  EXPECT_EQ(base->f1(), Dispatcher::dispatch_f1(derived_a));
+  EXPECT_EQ(base->f1(), Dispatcher::dispatch_f1(derived_b));
+  EXPECT_EQ(base->f1(), Dispatcher::dispatch_f1(derived_c));
+
+  delete base;
+  delete derived_a;
+  delete derived_b;
+  delete derived_c;
+}
+
+TEST(ImplicitTests, all_implemented_const) {
+  using namespace classes::implicit_style;
+
+  auto pbase = new PolyBase();
+  auto base = new Base();
+  auto derived_a = new DerivedA();
+  auto derived_b = new DerivedB();
+  auto derived_c = new DerivedC();
+
+  EXPECT_EQ(base->get_id(), pbase->f2());
+  EXPECT_NE(base->get_id(), pbase->f2());
+  EXPECT_NE(base->get_id(), pbase->f2());
+  EXPECT_NE(base->get_id(), pbase->f2());
+
+  delete base;
+  delete derived_a;
+  delete derived_b;
+  delete derived_c;
+}
