@@ -8,7 +8,7 @@
 #define __poly_dispatch(_mfunc)                                                          \
   template <class... ArgTs>                                                              \
     requires poly::detail::                                                              \
-        invocable_void_return<decltype(&Base::_mfunc), Base, ArgTs...>                   \
+        invocable_void_return<decltype(&Base::_mfunc), Base, ArgTs&&...>                 \
       static void dispatch_##_mfunc(const Base* ptr, ArgTs&&... args) {                  \
     bool found = false;                                                                  \
     ((reinterpret_cast<const Derived*>(ptr)->cid == Derived::scid                        \
@@ -22,7 +22,7 @@
                                                                                          \
   template <class... ArgTs>                                                              \
     requires poly::detail::                                                              \
-        invocable_non_void_return<decltype(&Base::_mfunc), Base, ArgTs...>               \
+        invocable_non_void_return<decltype(&Base::_mfunc), Base, ArgTs&&...>             \
       static auto dispatch_##_mfunc(const Base* ptr, ArgTs&&... args) {                  \
     std::invoke_result_t<decltype(&Base::_mfunc), Base, ArgTs...> result;                \
     bool found = false;                                                                  \
@@ -40,7 +40,7 @@
                                                                                          \
   template <class... ArgTs>                                                              \
     requires poly::detail::                                                              \
-        invocable_void_return<decltype(&Base::_mfunc), Base, ArgTs...>                   \
+        invocable_void_return<decltype(&Base::_mfunc), Base, ArgTs&&...>                 \
       static void dispatch_##_mfunc(Base* ptr, ArgTs&&... args) {                        \
     bool found = false;                                                                  \
     ((reinterpret_cast<Derived*>(ptr)->cid == Derived::scid                              \
@@ -53,9 +53,9 @@
                                                                                          \
   template <class... ArgTs>                                                              \
     requires poly::detail::                                                              \
-        invocable_non_void_return<decltype(&Base::_mfunc), Base, ArgTs...>               \
+        invocable_non_void_return<decltype(&Base::_mfunc), Base, ArgTs&&...>             \
       static auto dispatch_##_mfunc(Base* ptr, ArgTs&&... args) {                        \
-    std::invoke_result_t<decltype(&Base::_mfunc), Base, ArgTs...> result;                \
+    std::invoke_result_t<decltype(&Base::_mfunc, Base, ArgTs...> result;                \
     bool found = false;                                                                  \
     ((reinterpret_cast<Derived*>(ptr)->cid == Derived::scid                              \
              ? (result = reinterpret_cast<Derived*>(ptr)->_mfunc(                        \

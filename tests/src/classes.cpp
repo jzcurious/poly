@@ -20,6 +20,10 @@ class Base {
     return __PRETTY_FUNCTION__;
   }
 
+  // std::string get_id() {
+  //   return __PRETTY_FUNCTION__;
+  // }
+
   std::string f1() const {
     return get_id();
   }
@@ -110,7 +114,7 @@ namespace implicit_style {
 class DerivedA;
 class DerivedB;
 class DerivedC;
-class Default;
+class Base;
 
 __poly_decl_base(
     PolyBase,
@@ -120,7 +124,7 @@ __poly_decl_base(
       __poly_override_non_void(f2);
       __poly_override_non_void(f3);
     },
-    Default,
+    Base,
     DerivedA,
     DerivedB,
     DerivedC);

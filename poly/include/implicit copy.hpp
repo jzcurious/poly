@@ -4,51 +4,56 @@
 #define __poly_override_void(_mfunc)                                                     \
   template <class... ArgTs>                                                              \
   void _mfunc(ArgTs&&... args) {                                                         \
-    if (static_cast<Base*>(this)->cid == Base::scid)                                     \
-      return static_cast<Base*>(this)->_mfunc(std::forward<ArgTs>(args)...);             \
-    ((static_cast<Derived*>(this)->cid == Derived::scid                                  \
-             ? (static_cast<Derived*>(this)->_mfunc(std::forward<ArgTs>(args)...), true) \
+    bool found = false;                                                                  \
+    ((reinterpret_cast<Derived*>(this)->cid == Derived::scid                             \
+             ? (reinterpret_cast<Derived*>(this)->_mfunc(std::forward<ArgTs>(args)...),  \
+                   found = true)                                                         \
              : false)                                                                    \
         || ...);                                                                         \
+    if (not found) reinterpret_cast<Base*>(this)->_mfunc(std::forward<ArgTs>(args)...);  \
   }                                                                                      \
                                                                                          \
   template <class... ArgTs>                                                              \
   void _mfunc(ArgTs&&... args) const {                                                   \
-    if (static_cast<const Base*>(this)->cid == Base::scid)                               \
-      return static_cast<const Base*>(this)->_mfunc(std::forward<ArgTs>(args)...);       \
-    ((static_cast<const Derived*>(this)->cid == Derived::scid                            \
-             ? (static_cast<const Derived*>(this)->_mfunc(std::forward<ArgTs>(args)...), \
-                   true)                                                                 \
+    bool found = false;                                                                  \
+    ((reinterpret_cast<const Derived*>(this)->cid == Derived::scid                       \
+             ? (reinterpret_cast<const Derived*>(this)->_mfunc(                          \
+                    std::forward<ArgTs>(args)...),                                       \
+                   found = true)                                                         \
              : false)                                                                    \
         || ...);                                                                         \
+    if (not found)                                                                       \
+      reinterpret_cast<const Base*>(this)->_mfunc(std::forward<ArgTs>(args)...);         \
   }
 
 #define __poly_override_non_void(_mfunc)                                                 \
   template <class... ArgTs>                                                              \
   auto _mfunc(ArgTs&&... args) {                                                         \
-    if (static_cast<Base*>(this)->cid == Base::scid)                                     \
-      return static_cast<Base*>(this)->_mfunc(std::forward<ArgTs>(args)...);             \
     std::invoke_result_t<decltype(&Base::_mfunc), Base, ArgTs&&...> result;              \
-    ((static_cast<Derived*>(this)->cid == Derived::scid                                  \
-             ? (result                                                                   \
-                   = static_cast<Derived*>(this)->_mfunc(std::forward<ArgTs>(args)...),  \
-                   true)                                                                 \
+    bool found = false;                                                                  \
+    ((reinterpret_cast<Derived*>(this)->cid == Derived::scid                             \
+             ? (result = reinterpret_cast<Derived*>(this)->_mfunc(                       \
+                    std::forward<ArgTs>(args)...),                                       \
+                   found = true)                                                         \
              : false)                                                                    \
         || ...);                                                                         \
+    if (not found)                                                                       \
+      return reinterpret_cast<Base*>(this)->_mfunc(std::forward<ArgTs>(args)...);        \
     return result;                                                                       \
   }                                                                                      \
                                                                                          \
   template <class... ArgTs>                                                              \
   auto _mfunc(ArgTs&&... args) const {                                                   \
-    if (static_cast<const Base*>(this)->cid == Base::scid)                               \
-      return static_cast<const Base*>(this)->_mfunc(std::forward<ArgTs>(args)...);       \
     std::invoke_result_t<decltype(&Base::_mfunc), Base, ArgTs&&...> result;              \
-    ((static_cast<const Derived*>(this)->cid == Derived::scid                            \
-             ? (result = static_cast<const Derived*>(this)->_mfunc(                      \
+    bool found = false;                                                                  \
+    ((reinterpret_cast<const Derived*>(this)->cid == Derived::scid                       \
+             ? (result = reinterpret_cast<const Derived*>(this)->_mfunc(                 \
                     std::forward<ArgTs>(args)...),                                       \
-                   true)                                                                 \
+                   found = true)                                                         \
              : false)                                                                    \
         || ...);                                                                         \
+    if (not found)                                                                       \
+      return reinterpret_cast<const Base*>(this)->_mfunc(std::forward<ArgTs>(args)...);  \
     return result;                                                                       \
   }
 
