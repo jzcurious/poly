@@ -7,7 +7,7 @@
 namespace classes {
 namespace explicit_style {
 class Base {
-  __poly_enable();
+  __poly_set_class_id(0);
 
  public:
   int x;
@@ -39,7 +39,7 @@ class Base {
 };
 
 class DerivedA : public Base {
-  __poly_enable();
+  __poly_set_class_id(1);
 
  public:
   int y = 3;
@@ -60,7 +60,7 @@ class DerivedA : public Base {
 };
 
 class DerivedB : public Base {
-  __poly_enable();
+  __poly_set_class_id(2);
 
  public:
   void echo() const {
@@ -78,7 +78,7 @@ class DerivedB : public Base {
 };
 
 class DerivedC : public Base {
-  __poly_enable();
+  __poly_set_class_id(3);
 
  public:
   void echo() const {
@@ -130,7 +130,7 @@ __poly_decl_base(
     DerivedC);
 
 class Base : public PolyBase {
-  __poly_enable();
+  __poly_set_class_id(0);
 
  public:
   int x;
@@ -158,7 +158,7 @@ class Base : public PolyBase {
 };
 
 class DerivedA : public PolyBase {
-  __poly_enable();
+  __poly_set_class_id(1);
 
  public:
   int y = 3;
@@ -178,7 +178,7 @@ class DerivedA : public PolyBase {
 };
 
 class DerivedB : public PolyBase {
-  __poly_enable();
+  __poly_set_class_id(2);
 
  public:
   int x;
@@ -198,7 +198,7 @@ class DerivedB : public PolyBase {
 };
 
 class DerivedC : public PolyBase {
-  __poly_enable();
+  __poly_set_class_id(3);
 
  public:
   int x;

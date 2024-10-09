@@ -1,11 +1,11 @@
 #ifndef _POLYSA_HPP_
 #define _POLYSA_HPP_
 
-#define __poly_enable()                                                                  \
+#define __poly_set_class_id(_cid)                                                        \
                                                                                          \
  public:                                                                                 \
-  static constexpr const poly::cid_t scid = __LINE__ + 1;                                \
-  const poly::cid_t cid = scid
+  static constexpr const poly::cid_t scid = _cid;                                        \
+  const poly::cid_t cid = _cid
 
 namespace poly {
 

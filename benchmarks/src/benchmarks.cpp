@@ -4,7 +4,7 @@
 using namespace poly;
 
 class PolyBase {
-  __poly_enable();
+  __poly_set_class_id(0);
 
  public:
   float acc_base = 0;
@@ -46,7 +46,7 @@ class PolyBase {
 
 template <int x>
 class PolyDerived : public PolyBase {
-  __poly_enable();
+  __poly_set_class_id(x);
 
  public:
   float acc_Derived_a = 0;
@@ -189,7 +189,7 @@ __poly_decl_dispatcher(
     PolyDerived<9>,
     PolyDerived<10>);
 
-template <class T, size_t n = 100000>
+template <class T, size_t n = 200000>
 void call_all_methods_n_times(std::vector<T*>& objects) {
   float x = 5;
   float y = 8;
