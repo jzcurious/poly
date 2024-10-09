@@ -212,6 +212,7 @@ static void bench_cpp(benchmark::State& state) {
 }
 
 __poly_decl_group(Group, {
+  __autocast_to(Group);
   __dispatch(func_arity5f);
   __dispatch(func_arity3f);
   __dispatch(func_arity2f);
@@ -235,19 +236,48 @@ static void bench_poly(benchmark::State& state) {
       PolyChild<9>,
       PolyChild<10>>;
 
+  // std::vector<group_t*> objects = {
+  //   reinterpret_cast<group_t*>(new PolyBase()),
+  //   reinterpret_cast<group_t*>(new PolyChild<1>()),
+  //   reinterpret_cast<group_t*>(new PolyChild<2>()),
+  //   reinterpret_cast<group_t*>(new PolyChild<3>()),
+  //   reinterpret_cast<group_t*>(new PolyChild<4>()),
+  //   reinterpret_cast<group_t*>(new PolyChild<5>()),
+  //   reinterpret_cast<group_t*>(new PolyChild<6>()),
+  //   reinterpret_cast<group_t*>(new PolyChild<7>()),
+  //   reinterpret_cast<group_t*>(new PolyChild<8>()),
+  //   reinterpret_cast<group_t*>(new PolyChild<9>()),
+  //   reinterpret_cast<group_t*>(new PolyChild<10>())
+  // };
+
   std::vector<group_t*> objects = {
-      static_cast<group_t*>(new PolyBase()),
-      static_cast<group_t*>(static_cast<PolyBase*>(new PolyChild<1>())),
-      static_cast<group_t*>(static_cast<PolyBase*>(new PolyChild<2>())),
-      static_cast<group_t*>(static_cast<PolyBase*>(new PolyChild<3>())),
-      static_cast<group_t*>(static_cast<PolyBase*>(new PolyChild<4>())),
-      static_cast<group_t*>(static_cast<PolyBase*>(new PolyChild<5>())),
-      static_cast<group_t*>(static_cast<PolyBase*>(new PolyChild<6>())),
-      static_cast<group_t*>(static_cast<PolyBase*>(new PolyChild<7>())),
-      static_cast<group_t*>(static_cast<PolyBase*>(new PolyChild<8>())),
-      static_cast<group_t*>(static_cast<PolyBase*>(new PolyChild<9>())),
-      static_cast<group_t*>(static_cast<PolyBase*>(new PolyChild<10>()))
+    group_t::forward(new PolyBase()),
+    group_t::forward(new PolyChild<1>()),
+    group_t::forward(new PolyChild<2>()),
+    group_t::forward(new PolyChild<3>()),
+    group_t::forward(new PolyChild<4>()),
+    group_t::forward(new PolyChild<5>()),
+    group_t::forward(new PolyChild<6>()),
+    group_t::forward(new PolyChild<7>()),
+    group_t::forward(new PolyChild<8>()),
+    group_t::forward(new PolyChild<9>()),
+    group_t::forward(new PolyChild<10>())
   };
+
+  // std::vector<group_t*> objects = {
+  //     new PolyBase(),
+  //     new PolyChild<1>(),
+  //     new PolyChild<2>(),
+  //     new PolyChild<3>(),
+  //     new PolyChild<4>(),
+  //     new PolyChild<5>(),
+  //     new PolyChild<6>(),
+  //     new PolyChild<7>(),
+  //     new PolyChild<8>(),
+  //     new PolyChild<9>(),
+  //     new PolyChild<10>()
+  // };
+
   // clang-format on
 
   for (auto _ : state) {

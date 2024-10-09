@@ -37,10 +37,10 @@ template <poly_compatible Base, poly_compatible... Derived>
 struct PolyGroup : public Base {
   int cidof(const Base* ptr) const {
     poly_cid_t poly_cid = Base::poly_scid;
-    ((static_cast<const Derived*>(ptr)->poly_cid == Derived::poly_scid
+    ((reinterpret_cast<const Derived*>(ptr)->poly_cid == Derived::poly_scid
              ? poly_cid = Derived::poly_scid
-             : 0),
-        ...);
+             : 0)
+        || ...);
     return poly_cid;
   }
 };
@@ -52,11 +52,12 @@ struct PolyGroup : public Base {
     requires detail::invocable_void_return<decltype(&Base::_mfunc), Base, ArgTs...>      \
   void dispatch_##_mfunc(const Base* ptr, ArgTs&&... args) const {                       \
     bool found = false;                                                                  \
-    ((static_cast<const Derived*>(ptr)->poly_cid == Derived::poly_scid                   \
-             ? (static_cast<const Derived*>(ptr)->_mfunc(std::forward<ArgTs>(args)...),  \
+    ((reinterpret_cast<const Derived*>(ptr)->poly_cid == Derived::poly_scid              \
+             ? (reinterpret_cast<const Derived*>(ptr)->_mfunc(                           \
+                    std::forward<ArgTs>(args)...),                                       \
                    found = true)                                                         \
-             : false),                                                                   \
-        ...);                                                                            \
+             : false)                                                                    \
+        || ...);                                                                         \
     if (not found) ptr->_mfunc(args...);                                                 \
   }                                                                                      \
                                                                                          \
@@ -65,12 +66,12 @@ struct PolyGroup : public Base {
   auto dispatch_##_mfunc(const Base* ptr, ArgTs&&... args) const {                       \
     std::invoke_result_t<decltype(&Base::_mfunc), Base, ArgTs...> result;                \
     bool found = false;                                                                  \
-    ((static_cast<const Derived*>(ptr)->poly_cid == Derived::poly_scid                   \
-             ? (result = static_cast<const Derived*>(ptr)->_mfunc(                       \
+    ((reinterpret_cast<const Derived*>(ptr)->poly_cid == Derived::poly_scid              \
+             ? (result = reinterpret_cast<const Derived*>(ptr)->_mfunc(                  \
                     std::forward<ArgTs>(args)...),                                       \
                    found = true)                                                         \
-             : false),                                                                   \
-        ...);                                                                            \
+             : false)                                                                    \
+        || ...);                                                                         \
     if (not found)                                                                       \
       return ptr->_mfunc(args...);                                                       \
     else                                                                                 \
@@ -81,11 +82,11 @@ struct PolyGroup : public Base {
     requires detail::invocable_void_return<decltype(&Base::_mfunc), Base, ArgTs...>      \
   void dispatch_##_mfunc(Base* ptr, ArgTs&&... args) {                                   \
     bool found = false;                                                                  \
-    ((static_cast<Derived*>(ptr)->poly_cid == Derived::poly_scid                         \
-             ? (static_cast<Derived*>(ptr)->_mfunc(std::forward<ArgTs>(args)...),        \
+    ((reinterpret_cast<Derived*>(ptr)->poly_cid == Derived::poly_scid                    \
+             ? (reinterpret_cast<Derived*>(ptr)->_mfunc(std::forward<ArgTs>(args)...),   \
                    found = true)                                                         \
-             : false),                                                                   \
-        ...);                                                                            \
+             : false)                                                                    \
+        || ...);                                                                         \
     if (not found) ptr->_mfunc(args...);                                                 \
   }                                                                                      \
                                                                                          \
@@ -94,12 +95,12 @@ struct PolyGroup : public Base {
   auto dispatch_##_mfunc(Base* ptr, ArgTs&&... args) {                                   \
     std::invoke_result_t<decltype(&Base::_mfunc), Base, ArgTs...> result;                \
     bool found = false;                                                                  \
-    ((static_cast<Derived*>(ptr)->poly_cid == Derived::poly_scid                         \
-             ? (result                                                                   \
-                   = static_cast<Derived*>(ptr)->_mfunc(std::forward<ArgTs>(args)...),   \
+    ((reinterpret_cast<Derived*>(ptr)->poly_cid == Derived::poly_scid                    \
+             ? (result = reinterpret_cast<Derived*>(ptr)->_mfunc(                        \
+                    std::forward<ArgTs>(args)...),                                       \
                    found = true)                                                         \
-             : false),                                                                   \
-        ...);                                                                            \
+             : false)                                                                    \
+        || ...);                                                                         \
     if (not found)                                                                       \
       return ptr->_mfunc(args...);                                                       \
     else                                                                                 \
@@ -116,10 +117,17 @@ struct PolyGroup : public Base {
     return dispatch_##_mfunc(this, std::forward<ArgTs>(args)...);                        \
   }
 
-#define __poly_decl_group(_name, _dispatchers)                                           \
-  template <poly_compatible Base, poly_compatible... Derived>                            \
-  struct _name : public detail::PolyGroup<Base, Derived...> _dispatchers
+#define __autocast_to(_class)                                                            \
+  static _class* forward(Base* ptr) {                                                    \
+    return reinterpret_cast<_class*>(ptr);                                               \
+  }                                                                                      \
+  static const _class* forward(const Base* ptr) {                                        \
+    return reinterpret_cast<const _class*>(ptr);                                         \
+  }
 
+#define __poly_decl_group(_name, _body)                                                  \
+  template <poly_compatible Base, poly_compatible... Derived>                            \
+  struct _name : public detail::PolyGroup<Base, Derived...> _body
 }  // namespace poly
 
 #endif  // _POLY_HPP_
