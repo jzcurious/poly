@@ -55,7 +55,7 @@
     requires poly::detail::                                                              \
         invocable_non_void_return<decltype(&Base::_mfunc), Base, ArgTs&&...>             \
       static auto dispatch_##_mfunc(Base* ptr, ArgTs&&... args) {                        \
-    std::invoke_result_t<decltype(&Base::_mfunc, Base, ArgTs...> result;                \
+    std::invoke_result_t<decltype(&Base::_mfunc), Base, ArgTs...> result;                \
     bool found = false;                                                                  \
     ((reinterpret_cast<Derived*>(ptr)->cid == Derived::scid                              \
              ? (result = reinterpret_cast<Derived*>(ptr)->_mfunc(                        \
