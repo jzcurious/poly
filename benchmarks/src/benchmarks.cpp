@@ -1,195 +1,12 @@
 #include "benchmark/benchmark.h"
 #include "poly.hpp"
 
+#include "polyclasses.hpp"
+#include "vtclasses.hpp"
+
 using namespace poly;
 
-class PolyBase {
-  __poly_set_class_id(0);
-
- public:
-  float acc_base = 0;
-
-  float func_arity5f(float a0, float a1, float a2, float a3, float a4) {
-    auto y = (a0 + a1 + a2 - a3) / (a4 + 1);
-    acc_base += y;
-    return y;
-  }
-
-  float func_arity3f(float& a0, float& a1, float& a2) {
-    auto y = (a0 + a1 + a2) / (a2 + 1);
-    acc_base -= y;
-    return y;
-  }
-
-  float func_arity2f(float a0, float a1) {
-    auto y = a0 / (a1 + 1);
-    acc_base -= y;
-    return y;
-  }
-
-  float func_arity1f(float a0) {
-    auto y = a0 * 2;
-    acc_base -= y;
-    return y;
-  }
-
-  float func_arity0() {
-    auto y = acc_base / 5;
-    acc_base -= y;
-    return y;
-  }
-
-  float get_acc() {
-    return acc_base;
-  }
-};
-
-template <int x>
-class PolyDerived : public PolyBase {
-  __poly_set_class_id(x);
-
- public:
-  float acc_Derived_a = 0;
-
-  float func_arity5f(float a0, float a1, float a2, float a3, float a4) {
-    auto y = (a0 + a1 + a2 - a3) / (a4 + 1);
-    acc_Derived_a += y;
-    return y;
-  }
-
-  float func_arity3f(float& a0, float& a1, float& a2) {
-    auto y = (a0 + a1 + a2) / (a2 + 1);
-    acc_Derived_a -= y;
-    return y;
-  }
-
-  float func_arity2f(float a0, float a1) {
-    auto y = a0 / (a1 + 1);
-    acc_Derived_a -= y;
-    return y;
-  }
-
-  float func_arity1f(float a0) {
-    auto y = a0 * 2;
-    acc_Derived_a -= y;
-    return y;
-  }
-
-  float func_arity0() {
-    auto y = acc_Derived_a / 5;
-    acc_Derived_a -= y;
-    return y;
-  }
-
-  float get_acc() {
-    return acc_Derived_a;
-  }
-};
-
-class CppBase {
- public:
-  float acc_base = 0;
-
-  virtual float func_arity5f(float a0, float a1, float a2, float a3, float a4) {
-    auto y = (a0 + a1 + a2 - a3) / (a4 + 1);
-    acc_base += y;
-    return y;
-  }
-
-  virtual float func_arity3f(float& a0, float& a1, float& a2) {
-    auto y = (a0 + a1 + a2) / (a2 + 1);
-    acc_base -= y;
-    return y;
-  }
-
-  virtual float func_arity2f(float a0, float a1) {
-    auto y = a0 / (a1 + 1);
-    acc_base -= y;
-    return y;
-  }
-
-  virtual float func_arity1f(float a0) {
-    auto y = a0 * 2;
-    acc_base -= y;
-    return y;
-  }
-
-  virtual float func_arity0() {
-    auto y = acc_base / 5;
-    acc_base -= y;
-    return y;
-  }
-
-  virtual float get_acc() {
-    return acc_base;
-  }
-
-  virtual ~CppBase() {}
-};
-
-template <int x>
-class CppDerived : public CppBase {
- public:
-  float acc_Derived_a = 0;
-
-  float func_arity5f(float a0, float a1, float a2, float a3, float a4) override {
-    auto y = (a0 + a1 + a2 - a3) / (a4 + 1);
-    acc_Derived_a += y;
-    return y;
-  }
-
-  float func_arity3f(float& a0, float& a1, float& a2) override {
-    auto y = (a0 + a1 + a2) / (a2 + 1);
-    acc_Derived_a -= y;
-    return y;
-  }
-
-  float func_arity2f(float a0, float a1) override {
-    auto y = a0 / (a1 + 1);
-    acc_Derived_a -= y;
-    return y;
-  }
-
-  float func_arity1f(float a0) override {
-    auto y = a0 * 2;
-    acc_Derived_a -= y;
-    return y;
-  }
-
-  float func_arity0() override {
-    auto y = acc_Derived_a / 5;
-    acc_Derived_a -= y;
-    return y;
-  }
-
-  float get_acc() override {
-    return acc_Derived_a;
-  }
-};
-
-__poly_decl_dispatcher(
-    Dispatcher,
-    {
-      __poly_dispatch(func_arity5f);
-      __poly_dispatch(func_arity3f);
-      __poly_dispatch(func_arity2f);
-      __poly_dispatch(func_arity1f);
-      __poly_dispatch(func_arity0);
-      __poly_dispatch(get_acc);
-    },
-    PolyBase,
-    PolyDerived<1>,
-    PolyDerived<2>,
-    PolyDerived<3>,
-    PolyDerived<4>,
-    PolyDerived<5>,
-    PolyDerived<6>,
-    PolyDerived<7>,
-    PolyDerived<8>,
-    PolyDerived<9>,
-    PolyDerived<10>);
-
-template <class T, size_t n = 200000>
+template <class T, size_t n = 300000>
 void call_all_methods_n_times(std::vector<T*>& objects) {
   float x = 5;
   float y = 8;
@@ -227,7 +44,17 @@ static void bench_cpp(benchmark::State& state) {
       new CppDerived<7>(),
       new CppDerived<8>(),
       new CppDerived<9>(),
-      new CppDerived<10>()
+      new CppDerived<10>(),
+      new CppDerived<11>(),
+      new CppDerived<12>(),
+      new CppDerived<13>(),
+      new CppDerived<14>(),
+      new CppDerived<15>(),
+      new CppDerived<16>(),
+      new CppDerived<17>(),
+      new CppDerived<18>(),
+      new CppDerived<19>(),
+      new CppDerived<20>()
   };
   // clang-format on
 
@@ -254,7 +81,17 @@ static void bench_poly(benchmark::State& state) {
     reinterpret_cast<Dispatcher*>(new PolyDerived<7>()),
     reinterpret_cast<Dispatcher*>(new PolyDerived<8>()),
     reinterpret_cast<Dispatcher*>(new PolyDerived<9>()),
-    reinterpret_cast<Dispatcher*>(new PolyDerived<10>())
+    reinterpret_cast<Dispatcher*>(new PolyDerived<10>()),
+    reinterpret_cast<Dispatcher*>(new PolyDerived<11>()),
+    reinterpret_cast<Dispatcher*>(new PolyDerived<12>()),
+    reinterpret_cast<Dispatcher*>(new PolyDerived<13>()),
+    reinterpret_cast<Dispatcher*>(new PolyDerived<14>()),
+    reinterpret_cast<Dispatcher*>(new PolyDerived<15>()),
+    reinterpret_cast<Dispatcher*>(new PolyDerived<16>()),
+    reinterpret_cast<Dispatcher*>(new PolyDerived<17>()),
+    reinterpret_cast<Dispatcher*>(new PolyDerived<18>()),
+    reinterpret_cast<Dispatcher*>(new PolyDerived<19>()),
+    reinterpret_cast<Dispatcher*>(new PolyDerived<20>())
   };
 
   // clang-format on
