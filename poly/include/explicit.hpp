@@ -110,7 +110,7 @@ template <poly_compatible Base,
     poly_compatible DerivedHead,
     poly_compatible... DerivedTail>
 struct PolyDispatcherBase : public Base {
-  int cidof(const Base* ptr) const {
+  static int cidof(const Base* ptr) {
     if (static_cast<const DerivedHead*>(ptr)->cid == DerivedHead::scid)
       return DerivedHead::scid;
     cid_t cid = Base::scid;

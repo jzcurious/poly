@@ -105,6 +105,6 @@ static void bench_poly(benchmark::State& state) {
   }
 }
 
-BENCHMARK(bench_cpp);
 BENCHMARK(bench_poly);
+BENCHMARK(bench_cpp);
 BENCHMARK_MAIN();
