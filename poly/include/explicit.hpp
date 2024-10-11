@@ -41,6 +41,7 @@
         || ...);                                                                         \
     if (not is_derived) ptr->_mfunc(std::forward<ArgTs>(args)...);                       \
   }                                                                                      \
+                                                                                         \
   template <class... ArgTs>                                                              \
     requires poly::detail::                                                              \
         invocable_non_void_return<decltype(&Base::_mfunc), Base, ArgTs&&...>             \
@@ -67,11 +68,11 @@
     requires poly::detail::                                                              \
         invocable_non_void_return<decltype(&Base::_mfunc), Base, ArgTs&&...>             \
       static auto dispatch_##_mfunc(Base* ptr, ArgTs&&... args) {                        \
-    std::invoke_result_t<decltype(&Base::_mfunc), Base, ArgTs...> result;                \
     if (static_cast<DerivedHead*>(ptr)->cid == Base::scid)                               \
       return ptr->_mfunc(std::forward<ArgTs>(args)...);                                  \
     if (static_cast<DerivedHead*>(ptr)->cid == DerivedHead::scid)                        \
       return static_cast<DerivedHead*>(ptr)->_mfunc(std::forward<ArgTs>(args)...);       \
+    std::invoke_result_t<decltype(&Base::_mfunc), Base, ArgTs...> result;                \
     bool is_derived = false;                                                             \
     ((static_cast<DerivedTail*>(ptr)->cid == DerivedTail::scid                           \
              ? (result = static_cast<DerivedTail*>(ptr)->_mfunc(                         \
@@ -106,17 +107,12 @@ template <class F, class... ArgTs>
 constexpr bool invocable_void_return
     = std::invocable<F, ArgTs...> and std::is_void_v<std::invoke_result_t<F, ArgTs...>>;
 
-template <poly_compatible Base,
-    poly_compatible DerivedHead,
-    poly_compatible... DerivedTail>
+template <poly_compatible Base, poly_compatible... Derived>
 struct PolyDispatcherBase : public Base {
   static int cidof(const Base* ptr) {
-    if (static_cast<const DerivedHead*>(ptr)->cid == DerivedHead::scid)
-      return DerivedHead::scid;
     cid_t cid = Base::scid;
-    ((static_cast<const DerivedTail*>(ptr)->cid == DerivedTail::scid
-             ? (cid = DerivedTail::scid, true)
-             : false)
+    ((static_cast<const Derived*>(ptr)->cid == Derived::scid ? (cid = Derived::scid, true)
+                                                             : false)
         || ...);
     return cid;
   }
