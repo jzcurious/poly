@@ -20,12 +20,12 @@ void call_all_methods_n_times(std::vector<T*>& objects) {
         objects[j]->func_arity1f(i + 1.0f);
         objects[j]->func_arity0();
       } else {
-        Dispatcher::dispatch_func_arity5f(
+        Dispatcher::func_arity5f(
             objects[j], i + 1.0f, i - 1.0f, i - 1.0f, i + 1.0f, i + 1.0f);
-        Dispatcher::dispatch_func_arity3f(objects[j], x, y, z);
-        Dispatcher::dispatch_func_arity2f(objects[j], i + 1.0f, i + 1.0f);
-        Dispatcher::dispatch_func_arity1f(objects[j], i + 1.0f);
-        Dispatcher::dispatch_func_arity0(objects[j]);
+        Dispatcher::func_arity3f(objects[j], x, y, z);
+        Dispatcher::func_arity2f(objects[j], i + 1.0f, i + 1.0f);
+        Dispatcher::func_arity1f(objects[j], i + 1.0f);
+        Dispatcher::func_arity0(objects[j]);
       }
     }
   }

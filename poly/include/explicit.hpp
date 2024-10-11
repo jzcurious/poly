@@ -1,7 +1,6 @@
 #ifndef _POLY_EXPLICIT_HPP_
 #define _POLY_EXPLICIT_HPP_
 
-#include "polysa.hpp"
 #include <concepts>
 #include <type_traits>
 #include <utility>  // IWYU pragma: keep
@@ -10,7 +9,7 @@
   template <class... ArgTs>                                                              \
     requires poly::detail::                                                              \
         invocable_void_return<decltype(&Base::_mfunc), Base, ArgTs&&...>                 \
-      static void dispatch_##_mfunc(const Base* ptr, ArgTs&&... args) {                  \
+      static void _mfunc(const Base* ptr, ArgTs&&... args) {                             \
     if (static_cast<const DerivedHead*>(ptr)->cid == Base::scid)                         \
       return ptr->_mfunc(std::forward<ArgTs>(args)...);                                  \
     if (static_cast<const DerivedHead*>(ptr)->cid == DerivedHead::scid)                  \
@@ -28,7 +27,7 @@
   template <class... ArgTs>                                                              \
     requires poly::detail::                                                              \
         invocable_void_return<decltype(&Base::_mfunc), Base, ArgTs&&...>                 \
-      static void dispatch_##_mfunc(Base* ptr, ArgTs&&... args) {                        \
+      static void _mfunc(Base* ptr, ArgTs&&... args) {                                   \
     if (static_cast<DerivedHead*>(ptr)->cid == Base::scid)                               \
       return ptr->_mfunc(std::forward<ArgTs>(args)...);                                  \
     if (static_cast<DerivedHead*>(ptr)->cid == DerivedHead::scid)                        \
@@ -45,7 +44,7 @@
   template <class... ArgTs>                                                              \
     requires poly::detail::                                                              \
         invocable_non_void_return<decltype(&Base::_mfunc), Base, ArgTs&&...>             \
-      static auto dispatch_##_mfunc(const Base* ptr, ArgTs&&... args) {                  \
+      static auto _mfunc(const Base* ptr, ArgTs&&... args) {                             \
     if (static_cast<const DerivedHead*>(ptr)->cid == Base::scid)                         \
       return ptr->_mfunc(std::forward<ArgTs>(args)...);                                  \
     if (static_cast<const DerivedHead*>(ptr)->cid == DerivedHead::scid)                  \
@@ -67,7 +66,7 @@
   template <class... ArgTs>                                                              \
     requires poly::detail::                                                              \
         invocable_non_void_return<decltype(&Base::_mfunc), Base, ArgTs&&...>             \
-      static auto dispatch_##_mfunc(Base* ptr, ArgTs&&... args) {                        \
+      static auto _mfunc(Base* ptr, ArgTs&&... args) {                                   \
     if (static_cast<DerivedHead*>(ptr)->cid == Base::scid)                               \
       return ptr->_mfunc(std::forward<ArgTs>(args)...);                                  \
     if (static_cast<DerivedHead*>(ptr)->cid == DerivedHead::scid)                        \
@@ -90,9 +89,7 @@
   template <poly::poly_compatible Base,                                                  \
       poly::poly_compatible DerivedHead,                                                 \
       poly::poly_compatible... DerivedTail>                                              \
-  struct _name##_                                                                        \
-      : public poly::detail::PolyDispatcherBase<Base, DerivedHead, DerivedTail...>       \
-            _mfuncs;                                                                     \
+  struct _name##_ final : public Base _mfuncs;                                           \
   using _name = _name##_<__VA_ARGS__>
 
 namespace poly {
@@ -106,17 +103,6 @@ constexpr bool invocable_non_void_return
 template <class F, class... ArgTs>
 constexpr bool invocable_void_return
     = std::invocable<F, ArgTs...> and std::is_void_v<std::invoke_result_t<F, ArgTs...>>;
-
-template <poly_compatible Base, poly_compatible... Derived>
-struct PolyDispatcherBase : public Base {
-  static int cidof(const Base* ptr) {
-    cid_t cid = Base::scid;
-    ((static_cast<const Derived*>(ptr)->cid == Derived::scid ? (cid = Derived::scid, true)
-                                                             : false)
-        || ...);
-    return cid;
-  }
-};
 
 }  // namespace detail
 }  // namespace poly
