@@ -62,7 +62,17 @@ __base__ class PolyBase {
       PolyChild<7>,                                                                      \
       PolyChild<8>,                                                                      \
       PolyChild<9>,                                                                      \
-      PolyChild<10>>
+      PolyChild<10>,                                                                     \
+      PolyChild<11>,                                                                     \
+      PolyChild<12>,                                                                     \
+      PolyChild<13>,                                                                     \
+      PolyChild<14>,                                                                     \
+      PolyChild<15>,                                                                     \
+      PolyChild<16>,                                                                     \
+      PolyChild<17>,                                                                     \
+      PolyChild<18>,                                                                     \
+      PolyChild<19>,                                                                     \
+      PolyChild<20>>
 
 template <int x>
 class PolyChild;
@@ -193,7 +203,7 @@ class CppChild : public CppBase {
   }
 };
 
-template <class T, size_t n = 10000>
+template <class T, size_t n = 300000>
 void call_all_methods_n_times(std::vector<T*>& objects) {
   float x = 5;
   float y = 8;
@@ -222,7 +232,17 @@ static void bench_cpp(benchmark::State& state) {
       new CppChild<7>(),
       new CppChild<8>(),
       new CppChild<9>(),
-      new CppChild<10>()
+      new CppChild<10>(),
+      new CppChild<11>(),
+      new CppChild<12>(),
+      new CppChild<13>(),
+      new CppChild<14>(),
+      new CppChild<15>(),
+      new CppChild<16>(),
+      new CppChild<17>(),
+      new CppChild<18>(),
+      new CppChild<19>(),
+      new CppChild<20>()
   };
   // clang-format on
 
@@ -250,7 +270,17 @@ static void bench_poly(benchmark::State& state) {
       new PolyChild<7>(),
       new PolyChild<8>(),
       new PolyChild<9>(),
-      new PolyChild<10>()
+      new PolyChild<10>(),
+      new PolyChild<11>(),
+      new PolyChild<12>(),
+      new PolyChild<13>(),
+      new PolyChild<14>(),
+      new PolyChild<15>(),
+      new PolyChild<16>(),
+      new PolyChild<17>(),
+      new PolyChild<18>(),
+      new PolyChild<19>(),
+      new PolyChild<20>()
   };
   // clang-format on
 
