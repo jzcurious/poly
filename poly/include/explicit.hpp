@@ -11,14 +11,13 @@
     requires poly::detail::                                                              \
         invocable_void_return<decltype(&Base::_mfunc), Base, ArgTs&&...>                 \
       static void dispatch_##_mfunc(const Base* ptr, ArgTs&&... args) {                  \
-    if (reinterpret_cast<const DerivedHead*>(ptr)->cid == Base::scid)                    \
+    if (static_cast<const DerivedHead*>(ptr)->cid == Base::scid)                         \
       return ptr->_mfunc(std::forward<ArgTs>(args)...);                                  \
-    if (reinterpret_cast<const DerivedHead*>(ptr)->cid == DerivedHead::scid)             \
-      return reinterpret_cast<const DerivedHead*>(ptr)->_mfunc(                          \
-          std::forward<ArgTs>(args)...);                                                 \
+    if (static_cast<const DerivedHead*>(ptr)->cid == DerivedHead::scid)                  \
+      return static_cast<const DerivedHead*>(ptr)->_mfunc(std::forward<ArgTs>(args)...); \
     bool is_derived = false;                                                             \
-    ((reinterpret_cast<const DerivedTail*>(ptr)->cid == DerivedTail::scid                \
-             ? (reinterpret_cast<const DerivedTail*>(ptr)->_mfunc(                       \
+    ((static_cast<const DerivedTail*>(ptr)->cid == DerivedTail::scid                     \
+             ? (static_cast<const DerivedTail*>(ptr)->_mfunc(                            \
                     std::forward<ArgTs>(args)...),                                       \
                    is_derived = true)                                                    \
              : false)                                                                    \
@@ -30,14 +29,13 @@
     requires poly::detail::                                                              \
         invocable_void_return<decltype(&Base::_mfunc), Base, ArgTs&&...>                 \
       static void dispatch_##_mfunc(Base* ptr, ArgTs&&... args) {                        \
-    if (reinterpret_cast<DerivedHead*>(ptr)->cid == Base::scid)                          \
+    if (static_cast<DerivedHead*>(ptr)->cid == Base::scid)                               \
       return ptr->_mfunc(std::forward<ArgTs>(args)...);                                  \
-    if (reinterpret_cast<DerivedHead*>(ptr)->cid == DerivedHead::scid)                   \
-      return reinterpret_cast<DerivedHead*>(ptr)->_mfunc(std::forward<ArgTs>(args)...);  \
+    if (static_cast<DerivedHead*>(ptr)->cid == DerivedHead::scid)                        \
+      return static_cast<DerivedHead*>(ptr)->_mfunc(std::forward<ArgTs>(args)...);       \
     bool is_derived = false;                                                             \
-    ((reinterpret_cast<DerivedTail*>(ptr)->cid == DerivedTail::scid                      \
-             ? (reinterpret_cast<DerivedTail*>(ptr)->_mfunc(                             \
-                    std::forward<ArgTs>(args)...),                                       \
+    ((static_cast<DerivedTail*>(ptr)->cid == DerivedTail::scid                           \
+             ? (static_cast<DerivedTail*>(ptr)->_mfunc(std::forward<ArgTs>(args)...),    \
                    is_derived = true)                                                    \
              : false)                                                                    \
         || ...);                                                                         \
@@ -47,14 +45,14 @@
     requires poly::detail::                                                              \
         invocable_non_void_return<decltype(&Base::_mfunc), Base, ArgTs&&...>             \
       static auto dispatch_##_mfunc(const Base* ptr, ArgTs&&... args) {                  \
-    if (reinterpret_cast<const DerivedHead*>(ptr)->cid == Base::scid)                    \
+    if (static_cast<const DerivedHead*>(ptr)->cid == Base::scid)                         \
       return ptr->_mfunc(std::forward<ArgTs>(args)...);                                  \
-    if (reinterpret_cast<const DerivedHead*>(ptr)->cid == DerivedHead::scid)             \
-      return reinterpret_cast<DerivedHead*>(ptr)->_mfunc(std::forward<ArgTs>(args)...);  \
+    if (static_cast<const DerivedHead*>(ptr)->cid == DerivedHead::scid)                  \
+      return static_cast<DerivedHead*>(ptr)->_mfunc(std::forward<ArgTs>(args)...);       \
     std::invoke_result_t<decltype(&Base::_mfunc), Base, ArgTs...> result;                \
     bool is_derived = false;                                                             \
-    ((reinterpret_cast<const DerivedTail*>(ptr)->cid == DerivedTail::scid                \
-             ? (result = reinterpret_cast<const DerivedTail*>(ptr)->_mfunc(              \
+    ((static_cast<const DerivedTail*>(ptr)->cid == DerivedTail::scid                     \
+             ? (result = static_cast<const DerivedTail*>(ptr)->_mfunc(                   \
                     std::forward<ArgTs>(args)...),                                       \
                    is_derived = true)                                                    \
              : false)                                                                    \
@@ -70,13 +68,13 @@
         invocable_non_void_return<decltype(&Base::_mfunc), Base, ArgTs&&...>             \
       static auto dispatch_##_mfunc(Base* ptr, ArgTs&&... args) {                        \
     std::invoke_result_t<decltype(&Base::_mfunc), Base, ArgTs...> result;                \
-    if (reinterpret_cast<DerivedHead*>(ptr)->cid == Base::scid)                          \
+    if (static_cast<DerivedHead*>(ptr)->cid == Base::scid)                               \
       return ptr->_mfunc(std::forward<ArgTs>(args)...);                                  \
-    if (reinterpret_cast<DerivedHead*>(ptr)->cid == DerivedHead::scid)                   \
-      return reinterpret_cast<DerivedHead*>(ptr)->_mfunc(std::forward<ArgTs>(args)...);  \
+    if (static_cast<DerivedHead*>(ptr)->cid == DerivedHead::scid)                        \
+      return static_cast<DerivedHead*>(ptr)->_mfunc(std::forward<ArgTs>(args)...);       \
     bool is_derived = false;                                                             \
-    ((reinterpret_cast<DerivedTail*>(ptr)->cid == DerivedTail::scid                      \
-             ? (result = reinterpret_cast<DerivedTail*>(ptr)->_mfunc(                    \
+    ((static_cast<DerivedTail*>(ptr)->cid == DerivedTail::scid                           \
+             ? (result = static_cast<DerivedTail*>(ptr)->_mfunc(                         \
                     std::forward<ArgTs>(args)...),                                       \
                    is_derived = true)                                                    \
              : false)                                                                    \
