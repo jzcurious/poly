@@ -14,7 +14,7 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(poly-tests
     ${CMAKE_CURRENT_SOURCE_DIR}/src/tests.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/flat.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/classes.cpp
 )
 
 target_include_directories(poly-tests PRIVATE
