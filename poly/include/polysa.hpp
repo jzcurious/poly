@@ -17,17 +17,6 @@ concept poly_compatible = requires(T x) {
 
 using cid_t = int;
 
-template <poly_compatible Base, poly_compatible... Derived>
-struct PolyGroup final {
-  static int cidof(const Base* ptr) {
-    cid_t cid = Base::scid;
-    ((static_cast<const Derived*>(ptr)->cid == Derived::scid ? (cid = Derived::scid, true)
-                                                             : false)
-        || ...);
-    return cid;
-  }
-};
-
 }  // namespace poly
 
 #endif  // _POLYSA_HPP_

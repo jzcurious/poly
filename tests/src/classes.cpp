@@ -1,3 +1,4 @@
+#include "dispatcher.hpp"
 #include "poly.hpp"
 
 #include <iostream>

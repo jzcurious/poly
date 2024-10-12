@@ -89,22 +89,25 @@
   template <poly::poly_compatible Base,                                                  \
       poly::poly_compatible DerivedHead,                                                 \
       poly::poly_compatible... DerivedTail>                                              \
-  struct _name##_ final : public Base _mfuncs;                                           \
-  using _name = _name##_<__VA_ARGS__>
+  struct _name##_ final : public poly::detail::PolyDispatcher, public Base _mfuncs;      \
+  using _name = _name##_<__VA_ARGS__>;
 
-namespace poly {
-namespace detail {
+namespace poly::detail {
+
+struct PolyDispatcher {};
+
+template <class T>
+concept dispatcher_kind = std::derived_from<T, PolyDispatcher>;
 
 template <class F, class... ArgTs>
-constexpr bool invocable_non_void_return
+concept invocable_non_void_return
     = std::invocable<F, ArgTs...>
       and not std::is_void_v<std::invoke_result_t<F, ArgTs...>>;
 
 template <class F, class... ArgTs>
-constexpr bool invocable_void_return
+concept invocable_void_return
     = std::invocable<F, ArgTs...> and std::is_void_v<std::invoke_result_t<F, ArgTs...>>;
 
-}  // namespace detail
-}  // namespace poly
+}  // namespace poly::detail
 
 #endif  // _POLY_DISPATCHER_HPP_
