@@ -9,7 +9,7 @@
   template <class... ArgTs>                                                              \
     requires poly::detail::                                                              \
         invocable_void_return<decltype(&Base::_mfunc), Base, ArgTs&&...>                 \
-      static void _mfunc(const Base* ptr, ArgTs&&... args) {                             \
+      void _mfunc(const Base* ptr, ArgTs&&... args) const {                              \
     if (static_cast<const DerivedHead*>(ptr)->cid == Base::scid)                         \
       return ptr->_mfunc(std::forward<ArgTs>(args)...);                                  \
     if (static_cast<const DerivedHead*>(ptr)->cid == DerivedHead::scid)                  \
@@ -27,7 +27,7 @@
   template <class... ArgTs>                                                              \
     requires poly::detail::                                                              \
         invocable_void_return<decltype(&Base::_mfunc), Base, ArgTs&&...>                 \
-      static void _mfunc(Base* ptr, ArgTs&&... args) {                                   \
+      void _mfunc(Base* ptr, ArgTs&&... args) const {                                    \
     if (static_cast<DerivedHead*>(ptr)->cid == Base::scid)                               \
       return ptr->_mfunc(std::forward<ArgTs>(args)...);                                  \
     if (static_cast<DerivedHead*>(ptr)->cid == DerivedHead::scid)                        \
@@ -44,7 +44,7 @@
   template <class... ArgTs>                                                              \
     requires poly::detail::                                                              \
         invocable_non_void_return<decltype(&Base::_mfunc), Base, ArgTs&&...>             \
-      static auto _mfunc(const Base* ptr, ArgTs&&... args) {                             \
+      auto _mfunc(const Base* ptr, ArgTs&&... args) const {                              \
     if (static_cast<const DerivedHead*>(ptr)->cid == Base::scid)                         \
       return ptr->_mfunc(std::forward<ArgTs>(args)...);                                  \
     if (static_cast<const DerivedHead*>(ptr)->cid == DerivedHead::scid)                  \
@@ -66,7 +66,7 @@
   template <class... ArgTs>                                                              \
     requires poly::detail::                                                              \
         invocable_non_void_return<decltype(&Base::_mfunc), Base, ArgTs&&...>             \
-      static auto _mfunc(Base* ptr, ArgTs&&... args) {                                   \
+      auto _mfunc(Base* ptr, ArgTs&&... args) const {                                    \
     if (static_cast<DerivedHead*>(ptr)->cid == Base::scid)                               \
       return ptr->_mfunc(std::forward<ArgTs>(args)...);                                  \
     if (static_cast<DerivedHead*>(ptr)->cid == DerivedHead::scid)                        \
@@ -89,7 +89,24 @@
   template <poly::poly_compatible Base,                                                  \
       poly::poly_compatible DerivedHead,                                                 \
       poly::poly_compatible... DerivedTail>                                              \
-  struct _name##_ final : public poly::detail::PolyDispatcher, public Base _mfuncs;      \
+  struct _name##_ final : public poly::detail::PolyDispatcher, public Base {             \
+   private:                                                                              \
+    struct _mfuncs _overrided {};                                                        \
+                                                                                         \
+   public:                                                                               \
+    decltype(_overrided)* operator->() {                                                 \
+      return &_overrided;                                                                \
+    }                                                                                    \
+    const decltype(_overrided)* operator->() const {                                     \
+      return &_overrided;                                                                \
+    }                                                                                    \
+    auto forward(Base* ptr) {                                                            \
+      return reinterpret_cast<decltype(this)>(ptr);                                      \
+    }                                                                                    \
+    auto forward(const Base* ptr) const {                                                \
+      return reinterpret_cast<decltype(this)>(ptr);                                      \
+    }                                                                                    \
+  };                                                                                     \
   using _name = _name##_<__VA_ARGS__>;
 
 namespace poly::detail {
