@@ -1,5 +1,5 @@
-#ifndef _POLY_EXPLICIT_HPP_
-#define _POLY_EXPLICIT_HPP_
+#ifndef _POLY_DISPATCHER_HPP_
+#define _POLY_DISPATCHER_HPP_
 
 #include <concepts>
 #include <type_traits>
@@ -107,4 +107,4 @@ constexpr bool invocable_void_return
 }  // namespace detail
 }  // namespace poly
 
-#endif  // _POLY_EXPLICIT_HPP_
+#endif  // _POLY_DISPATCHER_HPP_
