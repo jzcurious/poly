@@ -94,17 +94,14 @@
     struct _mfuncs _overrided {};                                                        \
                                                                                          \
    public:                                                                               \
-    decltype(_overrided)* operator->() {                                                 \
-      return &_overrided;                                                                \
-    }                                                                                    \
     const decltype(_overrided)* operator->() const {                                     \
       return &_overrided;                                                                \
     }                                                                                    \
     auto forward(Base* ptr) {                                                            \
       return reinterpret_cast<decltype(this)>(ptr);                                      \
     }                                                                                    \
-    auto forward(const Base* ptr) const {                                                \
-      return reinterpret_cast<decltype(this)>(ptr);                                      \
+    auto forward(const Base* ptr) {                                                      \
+      return reinterpret_cast<const decltype(this)>(ptr);                                \
     }                                                                                    \
   };                                                                                     \
   using _name = _name##_<__VA_ARGS__>;

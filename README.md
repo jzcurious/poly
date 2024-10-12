@@ -4,25 +4,25 @@ The implementation of polymorphism without vtables
 
 ### Benchmark result
 
-Running ./poly-benchmarks \
-Run on (4 X 2500.02 MHz CPU s) \
-CPU Caches: \
-L1 Data 32 KiB (x2) \
-L1 Instruction 32 KiB (x2) \
-L2 Unified 256 KiB (x2) \
-L3 Unified 3072 KiB (x1) \
-Load Average: 1.05, 2.01, 2.81\
+Running ./poly-benchmarks\
+Run on (16 X 400 MHz CPU s)\
+CPU Caches:\
+  L1 Data 32 KiB (x8)\
+  L1 Instruction 32 KiB (x8)\
+  L2 Unified 512 KiB (x8)\
+  L3 Unified 16384 KiB (x1)\
+Load Average: 1.19, 1.19, 1.23
 
-| Benchmark         | Time       | CPU        | Iterations |
-| ----------------- | ---------- | ---------- | ---------- |
-| bench_poly_mean   | 351706 ns  | 350561 ns  | 3          |
-| bench_poly_median | 344905 ns  | 344058 ns  | 3          |
-| bench_poly_stddev | 18261 ns   | 18090 ns   | 3          |
-| bench_poly_cv     | 5.19 %     | 5.16 %     | 3          |
-| bench_cpp_mean    | 1802176 ns | 1796015 ns | 3          |
-| bench_cpp_median  | 1802405 ns | 1795599 ns | 3          |
-| bench_cpp_stddev  | 488 ns     | 824 ns     | 3          |
-| bench_cpp_cv      | 0.03 %     | 0.05 %     | 3          |
+|Benchmark            |      Time     |        CPU   |Iterations|
+|---------------------|---------------|--------------|----------|
+|bench_poly_mean      |   6.25 ms     |    6.24 ms   |         5|
+|bench_poly_median    |   6.25 ms     |    6.24 ms   |         5|
+|bench_poly_stddev    |  0.007 ms     |   0.006 ms   |         5|
+|bench_poly_cv        |   0.12 %      |    0.10 %    |         5|
+|bench_cpp_mean       |   58.0 ms     |    57.8 ms   |         5|
+|bench_cpp_median     |   58.0 ms     |    57.8 ms   |         5|
+|bench_cpp_stddev     |  0.532 ms     |   0.557 ms   |         5|
+|bench_cpp_cv         |   0.92 %      |    0.96 %    |         5|
 
 _(see benchmarks.cpp)_
 
