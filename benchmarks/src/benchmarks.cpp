@@ -7,7 +7,7 @@
 using namespace poly;
 
 template <class T, size_t n = 300000>
-void call_all_methods_n_times(std::vector<T*>& objects) {
+void call_all_methods_n_times(std::vector<T>& objects) {
   float x = 5;
   float y = 8;
   float z = 9;
@@ -62,7 +62,7 @@ static void bench_poly(benchmark::State& state) {
   auto dispatcher = Dispatcher{};
 
   // clang-format off
-  std::vector<Dispatcher*> objects = {
+  std::vector<Dispatcher> objects = {
     dispatcher.forward(new PolyBase()),
     dispatcher.forward(new PolyDerived<1>()),
     dispatcher.forward(new PolyDerived<2>()),
@@ -92,7 +92,7 @@ static void bench_poly(benchmark::State& state) {
   }
 
   for (auto obj : objects) {
-    delete obj;
+    obj.destroy();
   }
 }
 

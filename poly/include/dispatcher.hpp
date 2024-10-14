@@ -9,7 +9,7 @@
   template <class... ArgTs>                                                              \
     requires poly::detail::                                                              \
         invocable_void_return<decltype(&Base::_mfunc), Base, ArgTs&&...>                 \
-      void _mfunc(const Base* ptr, ArgTs&&... args) const {                              \
+      void dispatch_##_mfunc(const Base* ptr, ArgTs&&... args) const {                   \
     if (static_cast<const DerivedHead*>(ptr)->cid == Base::scid)                         \
       return ptr->_mfunc(std::forward<ArgTs>(args)...);                                  \
     if (static_cast<const DerivedHead*>(ptr)->cid == DerivedHead::scid)                  \
@@ -27,7 +27,7 @@
   template <class... ArgTs>                                                              \
     requires poly::detail::                                                              \
         invocable_void_return<decltype(&Base::_mfunc), Base, ArgTs&&...>                 \
-      void _mfunc(Base* ptr, ArgTs&&... args) const {                                    \
+      void dispatch_##_mfunc(Base* ptr, ArgTs&&... args) const {                         \
     if (static_cast<DerivedHead*>(ptr)->cid == Base::scid)                               \
       return ptr->_mfunc(std::forward<ArgTs>(args)...);                                  \
     if (static_cast<DerivedHead*>(ptr)->cid == DerivedHead::scid)                        \
@@ -44,7 +44,7 @@
   template <class... ArgTs>                                                              \
     requires poly::detail::                                                              \
         invocable_non_void_return<decltype(&Base::_mfunc), Base, ArgTs&&...>             \
-      auto _mfunc(const Base* ptr, ArgTs&&... args) const {                              \
+      auto dispatch_##_mfunc(const Base* ptr, ArgTs&&... args) const {                   \
     if (static_cast<const DerivedHead*>(ptr)->cid == Base::scid)                         \
       return ptr->_mfunc(std::forward<ArgTs>(args)...);                                  \
     if (static_cast<const DerivedHead*>(ptr)->cid == DerivedHead::scid)                  \
@@ -66,7 +66,7 @@
   template <class... ArgTs>                                                              \
     requires poly::detail::                                                              \
         invocable_non_void_return<decltype(&Base::_mfunc), Base, ArgTs&&...>             \
-      auto _mfunc(Base* ptr, ArgTs&&... args) const {                                    \
+      auto dispatch_##_mfunc(Base* ptr, ArgTs&&... args) const {                         \
     if (static_cast<DerivedHead*>(ptr)->cid == Base::scid)                               \
       return ptr->_mfunc(std::forward<ArgTs>(args)...);                                  \
     if (static_cast<DerivedHead*>(ptr)->cid == DerivedHead::scid)                        \
@@ -83,25 +83,75 @@
       return ptr->_mfunc(std::forward<ArgTs>(args)...);                                  \
     else                                                                                 \
       return result;                                                                     \
+  }                                                                                      \
+                                                                                         \
+  template <class... ArgTs>                                                              \
+  auto _mfunc(ArgTs&&... args) const {                                                   \
+    return dispatch_##_mfunc(_selected_const_ptr, std::forward<ArgTs>(args)...);         \
+  }                                                                                      \
+                                                                                         \
+  template <class... ArgTs>                                                              \
+  auto _mfunc(ArgTs&&... args) {                                                         \
+    return dispatch_##_mfunc(_selected_ptr, std::forward<ArgTs>(args)...);               \
   }
 
 #define __poly_decl_dispatcher(_name, _mfuncs, ...)                                      \
   template <poly::poly_compatible Base,                                                  \
       poly::poly_compatible DerivedHead,                                                 \
       poly::poly_compatible... DerivedTail>                                              \
-  struct _name##_ final : public poly::detail::PolyDispatcher, public Base {             \
+  struct _name##_ final : public poly::detail::PolyDispatcher {                          \
    private:                                                                              \
+    inline static Base* _selected_ptr = nullptr;                                         \
+    inline static const Base* _selected_const_ptr = nullptr;                             \
+    Base* _ptr = nullptr;                                                                \
+    const Base* _const_ptr = nullptr;                                                    \
     struct _mfuncs _overrided {};                                                        \
                                                                                          \
    public:                                                                               \
-    const decltype(_overrided)* operator->() const {                                     \
+    decltype(_overrided)* operator->() {                                                 \
       return &_overrided;                                                                \
     }                                                                                    \
+                                                                                         \
     auto forward(Base* ptr) {                                                            \
-      return reinterpret_cast<decltype(this)>(ptr);                                      \
+      _selected_const_ptr = nullptr;                                                     \
+      _selected_ptr = ptr;                                                               \
+      _const_ptr = nullptr;                                                              \
+      _ptr = ptr;                                                                        \
+      return *this;                                                                      \
     }                                                                                    \
-    auto forward(const Base* ptr) {                                                      \
-      return reinterpret_cast<const decltype(this)>(ptr);                                \
+                                                                                         \
+    auto forward(const Base* const_ptr) {                                                \
+      _selected_const_ptr = const_ptr;                                                   \
+      _selected_ptr = nullptr;                                                           \
+      _const_ptr = const_ptr;                                                            \
+      _ptr = nullptr;                                                                    \
+      return *this;                                                                      \
+    }                                                                                    \
+                                                                                         \
+    void destroy() {                                                                     \
+      auto ptr = _ptr;                                                                   \
+      if (static_cast<DerivedHead*>(ptr)->cid == Base::scid) return delete ptr;          \
+      if (static_cast<DerivedHead*>(ptr)->cid == DerivedHead::scid)                      \
+        return delete static_cast<DerivedHead*>(ptr);                                    \
+      bool is_derived = false;                                                           \
+      ((static_cast<DerivedTail*>(ptr)->cid == DerivedTail::scid                         \
+               ? (delete static_cast<DerivedTail*>(ptr), is_derived = true)              \
+               : false)                                                                  \
+          || ...);                                                                       \
+      if (not is_derived) delete ptr;                                                    \
+    }                                                                                    \
+                                                                                         \
+    void destroy() const {                                                               \
+      auto ptr = _const_ptr;                                                             \
+      if (static_cast<const DerivedHead*>(ptr)->cid == Base::scid) return delete ptr;    \
+      if (static_cast<const DerivedHead*>(ptr)->cid == DerivedHead::scid)                \
+        return delete static_cast<DerivedHead*>(ptr);                                    \
+      bool is_derived = false;                                                           \
+      ((static_cast<const DerivedTail*>(ptr)->cid == DerivedTail::scid                   \
+               ? (delete static_cast<const DerivedTail*>(ptr), is_derived = true)        \
+               : false)                                                                  \
+          || ...);                                                                       \
+      if (not is_derived) delete ptr;                                                    \
     }                                                                                    \
   };                                                                                     \
   using _name = _name##_<__VA_ARGS__>;
@@ -121,7 +171,6 @@ concept invocable_non_void_return
 template <class F, class... ArgTs>
 concept invocable_void_return
     = std::invocable<F, ArgTs...> and std::is_void_v<std::invoke_result_t<F, ArgTs...>>;
-
 }  // namespace poly::detail
 
 #endif  // _POLY_DISPATCHER_HPP_
