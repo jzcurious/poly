@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24...3.30)
-project(poly-security VERSION 1.0.0 LANGUAGES CXX)
+project(poly-security LANGUAGES CXX)
 
 add_executable(poly-security
     ${CMAKE_CURRENT_SOURCE_DIR}/src/security.cpp
