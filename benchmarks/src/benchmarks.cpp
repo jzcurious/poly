@@ -6,6 +6,8 @@
 
 using namespace poly;
 
+const size_t n = 300000;
+
 static void bench_cpp(benchmark::State& state) {
   // clang-format off
   std::vector<CppBase*> objects = {
@@ -36,7 +38,6 @@ static void bench_cpp(benchmark::State& state) {
   float x = 5;
   float y = 8;
   float z = 9;
-  const size_t n = 300000;
 
   for (auto _ : state) {
     for (size_t i = 0; i < n; ++i) {
@@ -87,7 +88,6 @@ static void bench_poly_implicit(benchmark::State& state) {
   float x = 5;
   float y = 8;
   float z = 9;
-  const size_t n = 300000;
 
   for (auto _ : state) {
     for (size_t i = 0; i < n; ++i) {
@@ -138,7 +138,6 @@ static void bench_poly_explicit(benchmark::State& state) {
   float x = 5;
   float y = 8;
   float z = 9;
-  const size_t n = 300000;
 
   for (auto _ : state) {
     for (size_t i = 0; i < n; ++i) {

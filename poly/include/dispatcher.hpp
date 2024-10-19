@@ -10,7 +10,7 @@
   template <class... ArgTs>                                                              \
     requires poly::detail::                                                              \
         invocable_void_return<decltype(&Base::_mfunc), Base, ArgTs&&...>                 \
-      void dispatch_##_mfunc(const Base* ptr, ArgTs&&... args) const {                   \
+      static void dispatch_##_mfunc(const Base* ptr, ArgTs&&... args) {                  \
     if (static_cast<const DerivedHead*>(ptr)->cid == Base::scid)                         \
       return ptr->_mfunc(std::forward<ArgTs>(args)...);                                  \
     if (static_cast<const DerivedHead*>(ptr)->cid == DerivedHead::scid)                  \
@@ -28,7 +28,7 @@
   template <class... ArgTs>                                                              \
     requires poly::detail::                                                              \
         invocable_void_return<decltype(&Base::_mfunc), Base, ArgTs&&...>                 \
-      void dispatch_##_mfunc(Base* ptr, ArgTs&&... args) const {                         \
+      static void dispatch_##_mfunc(Base* ptr, ArgTs&&... args) {                        \
     if (static_cast<DerivedHead*>(ptr)->cid == Base::scid)                               \
       return ptr->_mfunc(std::forward<ArgTs>(args)...);                                  \
     if (static_cast<DerivedHead*>(ptr)->cid == DerivedHead::scid)                        \
@@ -45,7 +45,7 @@
   template <class... ArgTs>                                                              \
     requires poly::detail::                                                              \
         invocable_non_void_return<decltype(&Base::_mfunc), Base, ArgTs&&...>             \
-      auto dispatch_##_mfunc(const Base* ptr, ArgTs&&... args) const {                   \
+      static auto dispatch_##_mfunc(const Base* ptr, ArgTs&&... args) {                  \
     if (static_cast<const DerivedHead*>(ptr)->cid == Base::scid)                         \
       return ptr->_mfunc(std::forward<ArgTs>(args)...);                                  \
     if (static_cast<const DerivedHead*>(ptr)->cid == DerivedHead::scid)                  \
@@ -67,7 +67,7 @@
   template <class... ArgTs>                                                              \
     requires poly::detail::                                                              \
         invocable_non_void_return<decltype(&Base::_mfunc), Base, ArgTs&&...>             \
-      auto dispatch_##_mfunc(Base* ptr, ArgTs&&... args) const {                         \
+      static auto dispatch_##_mfunc(Base* ptr, ArgTs&&... args) {                        \
     if (static_cast<DerivedHead*>(ptr)->cid == Base::scid)                               \
       return ptr->_mfunc(std::forward<ArgTs>(args)...);                                  \
     if (static_cast<DerivedHead*>(ptr)->cid == DerivedHead::scid)                        \
@@ -107,14 +107,20 @@
                                                                                          \
   template <poly::poly_compatible Base, poly::poly_compatible... Derived>                \
   struct _name##_ final : public _name##OverridedSuit<Base, Derived...> {                \
-    auto forward(Base* ptr) {                                                            \
-      this->_ptr = ptr;                                                                  \
-      return *this;                                                                      \
+    _name##_() = default;                                                                \
+                                                                                         \
+    _name##_(const Base* ptr)                                                            \
+        : _name##OverridedSuit<Base, Derived...>(ptr) {}                                 \
+                                                                                         \
+    _name##_(Base* ptr)                                                                  \
+        : _name##OverridedSuit<Base, Derived...>(ptr) {}                                 \
+                                                                                         \
+    static _name##_ forward(Base* ptr) {                                                 \
+      return _name##_(ptr);                                                              \
     }                                                                                    \
                                                                                          \
-    auto forward(const Base* ptr) {                                                      \
-      this->_ptr = ptr;                                                                  \
-      return *this;                                                                      \
+    static const _name##_ forward(const Base* ptr) {                                     \
+      return _name##_(ptr);                                                              \
     }                                                                                    \
   };                                                                                     \
                                                                                          \
@@ -126,8 +132,10 @@ template <poly_compatible Base,
     poly_compatible DerivedHead,
     poly_compatible... DerivedTail>
 struct OverridedSuit {
+ protected:
   const Base* _ptr;
 
+ public:
   OverridedSuit()
       : _ptr(nullptr) {}
 
@@ -144,6 +152,26 @@ struct OverridedSuit {
              : false)
         || ...);
     if (not is_derived) delete _ptr;
+  }
+
+  static void destroy(const Base* ptr) {
+    if (static_cast<const DerivedHead*>(ptr)->cid == Base::scid) return delete ptr;
+    if (static_cast<const DerivedHead*>(ptr)->cid == DerivedHead::scid)
+      return delete static_cast<const DerivedHead*>(ptr);
+    bool is_derived = false;
+    ((static_cast<const DerivedTail*>(ptr)->cid == DerivedTail::scid
+             ? ((delete static_cast<const DerivedTail*>(ptr)), is_derived = true)
+             : false)
+        || ...);
+    if (not is_derived) delete ptr;
+  }
+
+  operator const Base*() const {
+    return this->_ptr;
+  }
+
+  operator Base*() {
+    return const_cast<Base*>(this->_ptr);
   }
 };
 
