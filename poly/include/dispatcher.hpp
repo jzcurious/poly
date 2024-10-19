@@ -109,12 +109,12 @@
   struct _name##_ final : public _name##OverridedSuit<Base, Derived...> {                \
     auto forward(Base* ptr) {                                                            \
       this->_ptr = ptr;                                                                  \
-      return this;                                                                       \
+      return *this;                                                                      \
     }                                                                                    \
                                                                                          \
     auto forward(const Base* ptr) {                                                      \
       this->_ptr = ptr;                                                                  \
-      return this;                                                                       \
+      return *this;                                                                      \
     }                                                                                    \
   };                                                                                     \
                                                                                          \

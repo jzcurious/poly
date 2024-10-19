@@ -13,10 +13,10 @@ void case1() {
   auto derived_b = new DerivedB();
   auto derived_c = new DerivedC();
 
-  dispatcher.forward(base)->destroy();
-  dispatcher.forward(derived_a)->destroy();
-  dispatcher.forward(derived_b)->destroy();
-  dispatcher.forward(derived_c)->destroy();
+  dispatcher.forward(base).destroy();
+  dispatcher.forward(derived_a).destroy();
+  dispatcher.forward(derived_b).destroy();
+  dispatcher.forward(derived_c).destroy();
 }
 
 void case2() {
@@ -25,10 +25,10 @@ void case2() {
   const auto derived_b = new DerivedB();
   const auto derived_c = new DerivedC();
 
-  dispatcher.forward(base)->destroy();
-  dispatcher.forward(derived_a)->destroy();
-  dispatcher.forward(derived_b)->destroy();
-  dispatcher.forward(derived_c)->destroy();
+  dispatcher.forward(base).destroy();
+  dispatcher.forward(derived_a).destroy();
+  dispatcher.forward(derived_b).destroy();
+  dispatcher.forward(derived_c).destroy();
 }
 
 void case3() {
@@ -40,16 +40,16 @@ void case3() {
   };
 
   auto ptr = v[0];
-  ptr->destroy();
+  ptr.destroy();
 
   ptr = v[1];
-  ptr->destroy();
+  ptr.destroy();
 
   ptr = v[2];
-  ptr->destroy();
+  ptr.destroy();
 
   ptr = v[3];
-  ptr->destroy();
+  ptr.destroy();
 }
 
 void case4() {
@@ -60,10 +60,10 @@ void case4() {
       dispatcher.forward(new DerivedC()),
   };
 
-  v[0]->destroy();
-  v[1]->destroy();
-  v[2]->destroy();
-  v[3]->destroy();
+  v[0].destroy();
+  v[1].destroy();
+  v[2].destroy();
+  v[3].destroy();
 }
 
 void case5() {
@@ -74,13 +74,13 @@ void case5() {
       dispatcher.forward(new DerivedC()),
   };
 
-  for (auto ptr : v) ptr->destroy();
+  for (auto ptr : v) ptr.destroy();
 }
 
 int main() {
   case1();
   case2();
-  // case3();
-  // case4();
-  // case5();
+  case3();
+  case4();
+  case5();
 }

@@ -6,22 +6,6 @@
 
 using namespace poly;
 
-template <class T, size_t n = 300000>
-void call_all_methods_n_times(std::vector<T>& objects) {
-  float x = 5;
-  float y = 8;
-  float z = 9;
-  for (size_t i = 0; i < n; ++i) {
-    for (size_t j = 0; j < objects.size(); ++j) {
-      objects[j]->func_arity5f(i + 1.0f, i - 1.0f, i - 1.0f, i + 1.0f, i + 1.0f);
-      objects[j]->func_arity3f(x, y, z);
-      objects[j]->func_arity2f(i + 1.0f, i + 1.0f);
-      objects[j]->func_arity1f(i + 1.0f);
-      objects[j]->func_arity0();
-    }
-  }
-}
-
 static void bench_cpp(benchmark::State& state) {
   // clang-format off
   std::vector<CppBase*> objects = {
@@ -49,8 +33,21 @@ static void bench_cpp(benchmark::State& state) {
   };
   // clang-format on
 
+  float x = 5;
+  float y = 8;
+  float z = 9;
+  const size_t n = 300000;
+
   for (auto _ : state) {
-    call_all_methods_n_times(objects);
+    for (size_t i = 0; i < n; ++i) {
+      for (size_t j = 0; j < objects.size(); ++j) {
+        objects[j]->func_arity5f(i + 1.0f, i - 1.0f, i - 1.0f, i + 1.0f, i + 1.0f);
+        objects[j]->func_arity3f(x, y, z);
+        objects[j]->func_arity2f(i + 1.0f, i + 1.0f);
+        objects[j]->func_arity1f(i + 1.0f);
+        objects[j]->func_arity0();
+      }
+    }
   }
 
   for (auto obj : objects) {
@@ -58,7 +55,7 @@ static void bench_cpp(benchmark::State& state) {
   }
 }
 
-static void bench_poly(benchmark::State& state) {
+static void bench_poly_implicit(benchmark::State& state) {
   auto dispatcher = Dispatcher{};
 
   // clang-format off
@@ -87,15 +84,81 @@ static void bench_poly(benchmark::State& state) {
   };
   // clang-format on
 
+  float x = 5;
+  float y = 8;
+  float z = 9;
+  const size_t n = 300000;
+
   for (auto _ : state) {
-    call_all_methods_n_times(objects);
+    for (size_t i = 0; i < n; ++i) {
+      for (size_t j = 0; j < objects.size(); ++j) {
+        objects[j].func_arity5f(i + 1.0f, i - 1.0f, i - 1.0f, i + 1.0f, i + 1.0f);
+        objects[j].func_arity3f(x, y, z);
+        objects[j].func_arity2f(i + 1.0f, i + 1.0f);
+        objects[j].func_arity1f(i + 1.0f);
+        objects[j].func_arity0();
+      }
+    }
   }
 
-  // for (auto obj : objects) {
-  //   obj->destroy();
-  // }
+  for (auto obj : objects) {
+    obj.destroy();
+  }
 }
 
-BENCHMARK(bench_poly);
+static void bench_poly_explicit(benchmark::State& state) {
+  auto dispatcher = Dispatcher{};
+
+  // clang-format off
+  std::vector<PolyBase*> objects = {
+    new PolyBase(),
+    new PolyDerived<1>(),
+    new PolyDerived<2>(),
+    new PolyDerived<3>(),
+    new PolyDerived<4>(),
+    new PolyDerived<5>(),
+    new PolyDerived<6>(),
+    new PolyDerived<7>(),
+    new PolyDerived<8>(),
+    new PolyDerived<9>(),
+    new PolyDerived<10>(),
+    new PolyDerived<11>(),
+    new PolyDerived<12>(),
+    new PolyDerived<13>(),
+    new PolyDerived<14>(),
+    new PolyDerived<15>(),
+    new PolyDerived<16>(),
+    new PolyDerived<17>(),
+    new PolyDerived<18>(),
+    new PolyDerived<19>(),
+    new PolyDerived<20>()
+  };
+  // clang-format on
+
+  float x = 5;
+  float y = 8;
+  float z = 9;
+  const size_t n = 300000;
+
+  for (auto _ : state) {
+    for (size_t i = 0; i < n; ++i) {
+      for (size_t j = 0; j < objects.size(); ++j) {
+        dispatcher.dispatch_func_arity5f(
+            objects[j], i + 1.0f, i - 1.0f, i - 1.0f, i + 1.0f, i + 1.0f);
+        dispatcher.dispatch_func_arity3f(objects[j], x, y, z);
+        dispatcher.dispatch_func_arity2f(objects[j], i + 1.0f, i + 1.0f);
+        dispatcher.dispatch_func_arity1f(objects[j], i + 1.0f);
+        dispatcher.dispatch_func_arity0(objects[j]);
+      }
+    }
+  }
+
+  for (auto obj : objects) {
+    dispatcher.forward(obj).destroy();
+  }
+}
+
+BENCHMARK(bench_poly_explicit);
+BENCHMARK(bench_poly_implicit);
 BENCHMARK(bench_cpp);
 BENCHMARK_MAIN();
