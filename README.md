@@ -127,9 +127,9 @@ int main() {
   dispatcher.dispatch_partial_overrided_function(derived_b, 101, 4);
   dispatcher.forward(derived_c).partial_overrided_function(10, 8);
 
-  delete base;
-  delete derived_a;
-  delete derived_b;
-  delete derived_c;
+  dispatcher.destroy(base);
+  dispatcher.destroy(derived_a);
+  dispatcher.destroy(derived_b);
+  dispatcher.destroy(derived_c);
 }
 ```
