@@ -62,7 +62,7 @@ static void bench_poly(benchmark::State& state) {
   auto dispatcher = Dispatcher{};
 
   // clang-format off
-  std::vector<Dispatcher> objects = {
+  std::vector objects = {
     dispatcher.forward(new PolyBase()),
     dispatcher.forward(new PolyDerived<1>()),
     dispatcher.forward(new PolyDerived<2>()),
@@ -91,9 +91,9 @@ static void bench_poly(benchmark::State& state) {
     call_all_methods_n_times(objects);
   }
 
-  for (auto obj : objects) {
-    obj.destroy();
-  }
+  // for (auto obj : objects) {
+  //   obj->destroy();
+  // }
 }
 
 BENCHMARK(bench_poly);
