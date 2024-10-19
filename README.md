@@ -4,25 +4,30 @@ The implementation of polymorphism without vtables
 
 ### Benchmark result
 
+2024-10-19T13:05:25+07:00\
 Running ./poly-benchmarks\
-Run on (16 X 400 MHz CPU s)\
+Run on (16 X 3546.03 MHz CPU s)\
 CPU Caches:\
-  L1 Data 32 KiB (x8)\
-  L1 Instruction 32 KiB (x8)\
-  L2 Unified 512 KiB (x8)\
-  L3 Unified 16384 KiB (x1)\
-Load Average: 1.19, 1.19, 1.23
+ L1 Data 32 KiB (x8)\
+ L1 Instruction 32 KiB (x8)\
+ L2 Unified 512 KiB (x8)\
+ L3 Unified 16384 KiB (x1)\
+ Load Average: 2.38, 1.66, 1.62
 
-|Benchmark            |      Time     |        CPU   |Iterations|
-|---------------------|---------------|--------------|----------|
-|bench_poly_mean      |   6.25 ms     |    6.24 ms   |         5|
-|bench_poly_median    |   6.25 ms     |    6.24 ms   |         5|
-|bench_poly_stddev    |  0.007 ms     |   0.006 ms   |         5|
-|bench_poly_cv        |   0.12 %      |    0.10 %    |         5|
-|bench_cpp_mean       |   58.0 ms     |    57.8 ms   |         5|
-|bench_cpp_median     |   58.0 ms     |    57.8 ms   |         5|
-|bench_cpp_stddev     |  0.532 ms     |   0.557 ms   |         5|
-|bench_cpp_cv         |   0.92 %      |    0.96 %    |         5|
+| Benchmark                  | Time     | CPU      | Iterations |
+| -------------------------- | -------- | -------- | ---------- |
+| bench_poly_explicit_mean   | 6.98 ms  | 6.94 ms  | 3          |
+| bench_poly_explicit_median | 6.98 ms  | 6.93 ms  | 3          |
+| bench_poly_explicit_stddev | 0.047 ms | 0.048 ms | 3          |
+| bench_poly_explicit_cv     | 0.68 %   | 0.70 %   | 3          |
+| bench_poly_implicit_mean   | 8.35 ms  | 8.30 ms  | 3          |
+| bench_poly_implicit_median | 8.30 ms  | 8.25 ms  | 3          |
+| bench_poly_implicit_stddev | 0.487 ms | 0.478 ms | 3          |
+| bench_poly_implicit_cv     | 5.83 %   | 5.76 %   | 3          |
+| bench_cpp_mean             | 56.2 ms  | 55.9 ms  | 3          |
+| bench_cpp_median           | 56.2 ms  | 55.9 ms  | 3          |
+| bench_cpp_stddev           | 0.321 ms | 0.403 ms | 3          |
+| bench_cpp_cv               | 0.57 %   | 0.72 %   | 3          |
 
 _(see benchmarks.cpp)_
 
@@ -107,20 +112,20 @@ int main() {
   auto derived_b = reinterpret_cast<Base*>(new DerivedB());
   auto derived_c = reinterpret_cast<Base*>(new DerivedC());
 
-  dispatcher->overrided_function(base);
-  dispatcher.forward(derived_a)->overrided_function();
-  dispatcher->overrided_function(derived_b);
-  dispatcher->overrided_function(derived_c);
+  dispatcher.dispatch_overrided_function(base);
+  dispatcher.forward(derived_a).overrided_function();
+  dispatcher.dispatch_overrided_function(derived_b);
+  dispatcher.dispatch_overrided_function(derived_c);
 
-  dispatcher->not_overrided_function(base, 1);
-  dispatcher->not_overrided_function(derived_a, 10);
-  dispatcher.forward(derived_b)->not_overrided_function(10);
-  dispatcher->not_overrided_function(derived_c, 101);
+  dispatcher.dispatch_not_overrided_function(base, 1);
+  dispatcher.dispatch_not_overrided_function(derived_a, 10);
+  dispatcher.forward(derived_b).not_overrided_function(10);
+  dispatcher.dispatch_not_overrided_function(derived_c, 101);
 
-  dispatcher->partial_overrided_function(base, 1, 2);
-  dispatcher->partial_overrided_function(derived_a, 10, 15);
-  dispatcher->partial_overrided_function(derived_b, 101, 4);
-  dispatcher.forward(derived_c)->partial_overrided_function(10, 8);
+  dispatcher.dispatch_partial_overrided_function(base, 1, 2);
+  dispatcher.dispatch_partial_overrided_function(derived_a, 10, 15);
+  dispatcher.dispatch_partial_overrided_function(derived_b, 101, 4);
+  dispatcher.forward(derived_c).partial_overrided_function(10, 8);
 
   delete base;
   delete derived_a;

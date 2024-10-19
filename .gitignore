@@ -5,6 +5,9 @@
 *.cubin
 *.fatbin
 
+samples/build
+samples/build/*
+
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json

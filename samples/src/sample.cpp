@@ -76,20 +76,20 @@ int main() {
   auto derived_b = reinterpret_cast<Base*>(new DerivedB());
   auto derived_c = reinterpret_cast<Base*>(new DerivedC());
 
-  dispatcher->overrided_function(base);
-  dispatcher.forward(derived_a)->overrided_function();
-  dispatcher->overrided_function(derived_b);
-  dispatcher->overrided_function(derived_c);
+  dispatcher.dispatch_overrided_function(base);
+  dispatcher.forward(derived_a).overrided_function();
+  dispatcher.dispatch_overrided_function(derived_b);
+  dispatcher.dispatch_overrided_function(derived_c);
 
-  dispatcher->not_overrided_function(base, 1);
-  dispatcher->not_overrided_function(derived_a, 10);
-  dispatcher.forward(derived_b)->not_overrided_function(10);
-  dispatcher->not_overrided_function(derived_c, 101);
+  dispatcher.dispatch_not_overrided_function(base, 1);
+  dispatcher.dispatch_not_overrided_function(derived_a, 10);
+  dispatcher.forward(derived_b).not_overrided_function(10);
+  dispatcher.dispatch_not_overrided_function(derived_c, 101);
 
-  dispatcher->partial_overrided_function(base, 1, 2);
-  dispatcher->partial_overrided_function(derived_a, 10, 15);
-  dispatcher->partial_overrided_function(derived_b, 101, 4);
-  dispatcher.forward(derived_c)->partial_overrided_function(10, 8);
+  dispatcher.dispatch_partial_overrided_function(base, 1, 2);
+  dispatcher.dispatch_partial_overrided_function(derived_a, 10, 15);
+  dispatcher.dispatch_partial_overrided_function(derived_b, 101, 4);
+  dispatcher.forward(derived_c).partial_overrided_function(10, 8);
 
   delete base;
   delete derived_a;

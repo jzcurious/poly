@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24...3.30)
-project(poly-tests VERSION 1.0.0 LANGUAGES CXX)
+project(poly-tests LANGUAGES CXX)
 
 include(GoogleTest)
 include(FetchContent)
