@@ -101,47 +101,26 @@
   template <poly::poly_compatible Base,                                                  \
       poly::poly_compatible DerivedHead,                                                 \
       poly::poly_compatible... DerivedTail>                                              \
-  struct _name##_ final : public poly::detail::PolyDispatcher {                          \
-   private:                                                                              \
-    struct OverridedSuit                                                                 \
-        : public poly::detail::OverridedSuit<Base, DerivedHead, DerivedTail...>          \
-              _mfuncs;                                                                   \
-    OverridedSuit _overrided;                                                            \
+  struct _name##OverridedSuit                                                            \
+      : public poly::detail::OverridedSuit<Base, DerivedHead, DerivedTail...>            \
+            _mfuncs;                                                                     \
                                                                                          \
-   public:                                                                               \
-    using suit_t = OverridedSuit;                                                        \
-                                                                                         \
-    OverridedSuit* operator->() {                                                        \
-      return &_overrided;                                                                \
+  template <poly::poly_compatible Base, poly::poly_compatible... Derived>                \
+  struct _name##_ final : public _name##OverridedSuit<Base, Derived...> {                \
+    auto forward(Base* ptr) {                                                            \
+      this->_ptr = ptr;                                                                  \
+      return this;                                                                       \
     }                                                                                    \
                                                                                          \
-    OverridedSuit* forward(Base* ptr) {                                                  \
-      _overrided._ptr = ptr;                                                             \
-      return &_overrided;                                                                \
-    }                                                                                    \
-                                                                                         \
-    const OverridedSuit* forward(const Base* ptr) {                                      \
-      _overrided._ptr = ptr;                                                             \
-      return &_overrided;                                                                \
+    auto forward(const Base* ptr) {                                                      \
+      this->_ptr = ptr;                                                                  \
+      return this;                                                                       \
     }                                                                                    \
   };                                                                                     \
+                                                                                         \
   using _name = _name##_<__VA_ARGS__>;
 
 namespace poly::detail {
-
-struct PolyDispatcher {};
-
-template <class T>
-concept dispatcher_kind = std::derived_from<T, PolyDispatcher>;
-
-template <class F, class... ArgTs>
-concept invocable_non_void_return
-    = std::invocable<F, ArgTs...>
-      and not std::is_void_v<std::invoke_result_t<F, ArgTs...>>;
-
-template <class F, class... ArgTs>
-concept invocable_void_return
-    = std::invocable<F, ArgTs...> and std::is_void_v<std::invoke_result_t<F, ArgTs...>>;
 
 template <poly_compatible Base,
     poly_compatible DerivedHead,
@@ -153,7 +132,7 @@ struct OverridedSuit {
       : _ptr(nullptr) {}
 
   OverridedSuit(const Base* cptr)
-      : _ptr(nullptr) {}
+      : _ptr(cptr) {}
 
   void destroy() const {
     if (static_cast<const DerivedHead*>(_ptr)->cid == Base::scid) return delete _ptr;
@@ -167,6 +146,16 @@ struct OverridedSuit {
     if (not is_derived) delete _ptr;
   }
 };
+
+template <class F, class... ArgTs>
+concept invocable_non_void_return
+    = std::invocable<F, ArgTs...>
+      and not std::is_void_v<std::invoke_result_t<F, ArgTs...>>;
+
+template <class F, class... ArgTs>
+concept invocable_void_return
+    = std::invocable<F, ArgTs...> and std::is_void_v<std::invoke_result_t<F, ArgTs...>>;
+
 }  // namespace poly::detail
 
 #endif  // _POLY_DISPATCHER_HPP_
