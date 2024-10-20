@@ -2,81 +2,61 @@
 #define _POLY_DISPATCHER_HPP_
 
 #include "polysa.hpp"
-#include <concepts>
-#include <type_traits>
-#include <utility>  // IWYU pragma: keep
 
 #define __poly_dispatch(_mfunc)                                                          \
-  template <class... ArgTs>                                                              \
-    requires poly::detail::                                                              \
-        invocable_void_return<decltype(&Base::_mfunc), const Base, ArgTs&&...>           \
-      static void dispatch_##_mfunc(const Base* ptr, ArgTs&&... args) {                  \
-    if (static_cast<const DerivedHead*>(ptr)->cid == Base::scid)                         \
-      return ptr->_mfunc(std::forward<ArgTs>(args)...);                                  \
-    if (static_cast<const DerivedHead*>(ptr)->cid == DerivedHead::scid)                  \
-      return static_cast<const DerivedHead*>(ptr)->_mfunc(std::forward<ArgTs>(args)...); \
-    if (((static_cast<const DerivedTail*>(ptr)->cid == DerivedTail::scid                 \
-                 ? (static_cast<const DerivedTail*>(ptr)->_mfunc(                        \
-                        std::forward<ArgTs>(args)...),                                   \
-                       true)                                                             \
-                 : false)                                                                \
-            || ...))                                                                     \
-      return;                                                                            \
-  }                                                                                      \
                                                                                          \
-  template <class... ArgTs>                                                              \
-    requires poly::detail::                                                              \
-        invocable_void_return<decltype(&Base::_mfunc), Base, ArgTs&&...>                 \
-      static void dispatch_##_mfunc(Base* ptr, ArgTs&&... args) {                        \
-    if (static_cast<DerivedHead*>(ptr)->cid == Base::scid)                               \
-      return ptr->_mfunc(std::forward<ArgTs>(args)...);                                  \
-    if (static_cast<DerivedHead*>(ptr)->cid == DerivedHead::scid)                        \
-      return static_cast<DerivedHead*>(ptr)->_mfunc(std::forward<ArgTs>(args)...);       \
-    if (((static_cast<DerivedTail*>(ptr)->cid == DerivedTail::scid                       \
-                 ? (static_cast<DerivedTail*>(ptr)->_mfunc(                              \
-                        std::forward<ArgTs>(args)...),                                   \
-                       true)                                                             \
-                 : false)                                                                \
-            || ...))                                                                     \
-      return;                                                                            \
-  }                                                                                      \
+ private:                                                                                \
+  template <poly::poly_compatible Base_,                                                 \
+      poly::poly_compatible DerivedHead_,                                                \
+      poly::poly_compatible... DerivedTail_>                                             \
+  struct dispatch_##_mfunc##_t {                                                         \
+    template <class... ArgTs>                                                            \
+      requires std::invocable<decltype(&Base_::_mfunc), Base_, ArgTs&&...>               \
+    static auto call(Base_* ptr, ArgTs&&... args) {                                      \
+      if (static_cast<DerivedHead_*>(ptr)->cid == Base_::scid)                           \
+        return ptr->_mfunc(std::forward<ArgTs>(args)...);                                \
+      if (static_cast<DerivedHead_*>(ptr)->cid == DerivedHead_::scid)                    \
+        return static_cast<DerivedHead_*>(ptr)->_mfunc(std::forward<ArgTs>(args)...);    \
+      using result_t = std::invoke_result_t<decltype(&Base_::_mfunc), Base_, ArgTs...>;  \
+      if constexpr (std::is_void_v<result_t>) {                                          \
+        if (((static_cast<DerivedTail_*>(ptr)->cid == DerivedTail_::scid                 \
+                     ? (static_cast<DerivedTail_*>(ptr)->_mfunc(                         \
+                            std::forward<ArgTs>(args)...),                               \
+                           true)                                                         \
+                     : false)                                                            \
+                || ...))                                                                 \
+          return;                                                                        \
+      } else {                                                                           \
+        result_t result;                                                                 \
+        if (((static_cast<DerivedTail_*>(ptr)->cid == DerivedTail_::scid                 \
+                     ? (result = static_cast<DerivedTail_*>(ptr)->_mfunc(                \
+                            std::forward<ArgTs>(args)...),                               \
+                           true)                                                         \
+                     : false)                                                            \
+                || ...))                                                                 \
+          return result;                                                                 \
+        return ptr->_mfunc(std::forward<ArgTs>(args)...);                                \
+      }                                                                                  \
+    }                                                                                    \
+  };                                                                                     \
                                                                                          \
-  template <class... ArgTs>                                                              \
-    requires poly::detail::                                                              \
-        invocable_non_void_return<decltype(&Base::_mfunc), const Base, ArgTs&&...>       \
-      static auto dispatch_##_mfunc(const Base* ptr, ArgTs&&... args) {                  \
-    if (static_cast<const DerivedHead*>(ptr)->cid == Base::scid)                         \
+ public:                                                                                 \
+  template <class T, class... ArgTs>                                                     \
+    requires(std::derived_from<T, Base>                                                  \
+             and std::invocable<decltype(&T::_mfunc), T, ArgTs && ...>)                  \
+  static auto dispatch_##_mfunc(T* ptr, ArgTs&&... args) {                               \
+    if constexpr (not std::is_same_v<T, Base>) {                                         \
       return ptr->_mfunc(std::forward<ArgTs>(args)...);                                  \
-    if (static_cast<const DerivedHead*>(ptr)->cid == DerivedHead::scid)                  \
-      return static_cast<const DerivedHead*>(ptr)->_mfunc(std::forward<ArgTs>(args)...); \
-    std::invoke_result_t<decltype(&Base::_mfunc), Base, ArgTs...> result;                \
-    if (((static_cast<const DerivedTail*>(ptr)->cid == DerivedTail::scid                 \
-                 ? (result = static_cast<const DerivedTail*>(ptr)->_mfunc(               \
-                        std::forward<ArgTs>(args)...),                                   \
-                       true)                                                             \
-                 : false)                                                                \
-            || ...))                                                                     \
-      return result;                                                                     \
-    return ptr->_mfunc(std::forward<ArgTs>(args)...);                                    \
-  }                                                                                      \
-                                                                                         \
-  template <class... ArgTs>                                                              \
-    requires poly::detail::                                                              \
-        invocable_non_void_return<decltype(&Base::_mfunc), Base, ArgTs&&...>             \
-      static auto dispatch_##_mfunc(Base* ptr, ArgTs&&... args) {                        \
-    if (static_cast<DerivedHead*>(ptr)->cid == Base::scid)                               \
-      return ptr->_mfunc(std::forward<ArgTs>(args)...);                                  \
-    if (static_cast<DerivedHead*>(ptr)->cid == DerivedHead::scid)                        \
-      return static_cast<DerivedHead*>(ptr)->_mfunc(std::forward<ArgTs>(args)...);       \
-    std::invoke_result_t<decltype(&Base::_mfunc), Base, ArgTs...> result;                \
-    if (((static_cast<DerivedTail*>(ptr)->cid == DerivedTail::scid                       \
-                 ? (result = static_cast<DerivedTail*>(ptr)->_mfunc(                     \
-                        std::forward<ArgTs>(args)...),                                   \
-                       true)                                                             \
-                 : false)                                                                \
-            || ...))                                                                     \
-      return result;                                                                     \
-    return ptr->_mfunc(std::forward<ArgTs>(args)...);                                    \
+    } else {                                                                             \
+      if constexpr (std::is_const_v<T>) {                                                \
+        return dispatch_##_mfunc##_t<const Base,                                         \
+            const DerivedHead,                                                           \
+            const DerivedTail...>::call(ptr, std::forward<ArgTs>(args)...);              \
+      } else {                                                                           \
+        return dispatch_##_mfunc##_t<Base, DerivedHead, DerivedTail...>::call(           \
+            ptr, std::forward<ArgTs>(args)...);                                          \
+      }                                                                                  \
+    }                                                                                    \
   }                                                                                      \
                                                                                          \
   template <class... ArgTs>                                                              \
@@ -162,15 +142,6 @@ struct OverridedSuit {
     return const_cast<Base*>(this->_ptr);
   }
 };
-
-template <class F, class... ArgTs>
-concept invocable_non_void_return
-    = std::invocable<F, ArgTs...>
-      and not std::is_void_v<std::invoke_result_t<F, ArgTs...>>;
-
-template <class F, class... ArgTs>
-concept invocable_void_return
-    = std::invocable<F, ArgTs...> and std::is_void_v<std::invoke_result_t<F, ArgTs...>>;
 
 }  // namespace poly::detail
 

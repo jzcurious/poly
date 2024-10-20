@@ -9,40 +9,40 @@ class PolyBase {
   __poly_set_class_id(0);
 
  public:
-  float acc_base = 0;
+  float acc = 0;
 
   float func_arity5f(float a0, float a1, float a2, float a3, float a4) {
     auto y = (a0 + a1 + a2 - a3) / (a4 + 1);
-    acc_base += y;
+    acc += y;
     return y;
   }
 
   float func_arity3f(float& a0, float& a1, float& a2) {
     auto y = (a0 + a1 + a2) / (a2 + 1);
-    acc_base -= y;
+    acc -= y;
     return y;
   }
 
   float func_arity2f(float a0, float a1) {
     auto y = a0 / (a1 + 1);
-    acc_base -= y;
+    acc -= y;
     return y;
   }
 
   float func_arity1f(float a0) {
     auto y = a0 * 2;
-    acc_base -= y;
+    acc -= y;
     return y;
   }
 
   float func_arity0() {
-    auto y = acc_base / 5;
-    acc_base -= y;
+    auto y = acc / 5;
+    acc -= y;
     return y;
   }
 
   float get_acc() {
-    return acc_base;
+    return acc;
   }
 };
 
@@ -51,40 +51,38 @@ class PolyDerived : public PolyBase {
   __poly_set_class_id(x);
 
  public:
-  float acc_derived = 0;
-
   float func_arity5f(float a0, float a1, float a2, float a3, float a4) {
     auto y = (a0 + a1 + a2 - a3) / (a4 + 1);
-    acc_derived += y;
+    acc += y;
     return y;
   }
 
   float func_arity3f(float& a0, float& a1, float& a2) {
     auto y = (a0 + a1 + a2) / (a2 + 1);
-    acc_derived -= y;
+    acc -= y;
     return y;
   }
 
   float func_arity2f(float a0, float a1) {
     auto y = a0 / (a1 + 1);
-    acc_derived -= y;
+    acc -= y;
     return y;
   }
 
   float func_arity1f(float a0) {
     auto y = a0 * 2;
-    acc_derived -= y;
+    acc -= y;
     return y;
   }
 
   float func_arity0() {
-    auto y = acc_derived / 5;
-    acc_derived -= y;
+    auto y = acc / 5;
+    acc -= y;
     return y;
   }
 
   float get_acc() {
-    return acc_derived;
+    return acc;
   }
 };
 
