@@ -7,6 +7,8 @@
   static constexpr const poly::cid_t scid = _cid;                                        \
   const poly::cid_t cid = _cid
 
+#define poly_override
+
 namespace poly {
 
 template <class T>
