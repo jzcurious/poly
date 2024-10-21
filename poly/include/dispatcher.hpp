@@ -112,17 +112,6 @@ struct OverridedSuit {
   OverridedSuit(const Base* cptr)
       : _ptr(cptr) {}
 
-  void destroy() const {
-    if (static_cast<const DerivedHead*>(_ptr)->cid == Base::scid) return delete _ptr;
-    if (static_cast<const DerivedHead*>(_ptr)->cid == DerivedHead::scid)
-      return delete static_cast<const DerivedHead*>(_ptr);
-    bool is_derived = ((static_cast<const DerivedTail*>(_ptr)->cid == DerivedTail::scid
-                               ? ((delete static_cast<const DerivedTail*>(_ptr)), true)
-                               : false)
-                       || ...);
-    if (not is_derived) delete _ptr;
-  }
-
   static void destroy(const Base* ptr) {
     if (static_cast<const DerivedHead*>(ptr)->cid == Base::scid) return delete ptr;
     if (static_cast<const DerivedHead*>(ptr)->cid == DerivedHead::scid)
@@ -132,6 +121,25 @@ struct OverridedSuit {
                                : false)
                        || ...);
     if (not is_derived) delete ptr;
+  }
+
+  void destroy() const {
+    destroy(_ptr);
+  }
+
+  static int cidof(const Base* ptr) {
+    if (static_cast<const DerivedHead*>(ptr)->cid == DerivedHead::scid)
+      return DerivedHead::scid;
+    cid_t cid = Base::scid;
+    ((static_cast<const DerivedTail*>(ptr)->cid == DerivedTail::scid
+             ? (cid = DerivedTail::scid, true)
+             : false)
+        || ...);
+    return cid;
+  }
+
+  int cidof() const {
+    return cidof(_ptr);
   }
 
   operator const Base*() const {
