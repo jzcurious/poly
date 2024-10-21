@@ -157,23 +157,19 @@ TEST(ForwardingTests, not_impemented_in_derived_const) {
   delete derived_c;
 }
 
-// TEST(ForwardingTests, not_impemented_in_derived_const_known_types) {
-//   auto base = new Base();
-//   auto derived_a = new DerivedA();
-//   auto derived_b = new DerivedB();
-//   auto derived_c = new DerivedC();
+TEST(ForwardingTests, not_impemented_in_derived_const_known_types) {
+  auto base = new Base();
+  auto derived_a = new DerivedA();
+  auto derived_b = new DerivedB();
+  auto derived_c = new DerivedC();
 
-//   auto derived_a_ = reinterpret_cast<Base*>(derived_a);
-//   auto derived_b_ = reinterpret_cast<Base*>(derived_b);
-//   auto derived_c_ = reinterpret_cast<Base*>(derived_c);
+  EXPECT_EQ(base->f1(), dispatcher.forward(base).f1());
+  EXPECT_EQ(derived_a->f1(), dispatcher.forward(derived_a).f1());
+  EXPECT_EQ(derived_b->f1(), dispatcher.forward(derived_b).f1());
+  EXPECT_EQ(derived_c->f1(), dispatcher.forward(derived_c).f1());
 
-//   EXPECT_EQ(base->f1(), dispatcher.forward(base).f1());
-//   EXPECT_EQ(derived_a->f1(), dispatcher.forward(derived_a_).f1());
-//   EXPECT_EQ(derived_b->f1(), dispatcher.forward(derived_b_).f1());
-//   EXPECT_EQ(derived_c->f1(), dispatcher.forward(derived_c_).f1());
-
-//   delete base;
-//   delete derived_a;
-//   delete derived_b;
-//   delete derived_c;
-// }
+  delete base;
+  delete derived_a;
+  delete derived_b;
+  delete derived_c;
+}
