@@ -28,11 +28,11 @@ class DerivedA : public Base {
  public:
   int y = 3;
 
-  void overrided_function() const {
+  void overrided_function() const poly_override {
     std::cout << __PRETTY_FUNCTION__ << std::endl;
   }
 
-  int partial_overrided_function(int x, int y) {
+  int partial_overrided_function(int x, int y) poly_override {
     std::cout << __PRETTY_FUNCTION__ << std::endl;
     return x * y - val;
   }
@@ -42,7 +42,7 @@ class DerivedB : public Base {
   __poly_set_class_id(2);
 
  public:
-  void overrided_function() const {
+  void overrided_function() const poly_override {
     std::cout << __PRETTY_FUNCTION__ << std::endl;
   }
 };
@@ -51,7 +51,7 @@ class DerivedC : public Base {
   __poly_set_class_id(3);
 
  public:
-  void overrided_function() const {
+  void overrided_function() const poly_override {
     std::cout << __PRETTY_FUNCTION__ << std::endl;
   }
 };
