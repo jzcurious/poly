@@ -10,6 +10,6 @@ add_executable(poly-sample
     ${CMAKE_CURRENT_SOURCE_DIR}/src/sample.cpp
 )
 
-target_include_directories(poly-sample PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/../poly/include
+target_link_libraries(poly-samples PRIVATE
+    poly
 )

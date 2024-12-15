@@ -10,3 +10,5 @@ target_include_directories(poly-security PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../poly/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../tests/src/
 )
+
+target_link_libraries(poly-security PRIVATE poly)

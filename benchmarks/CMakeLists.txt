@@ -17,10 +17,10 @@ add_executable(poly-benchmarks
 )
 
 target_include_directories(poly-benchmarks PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/../poly/include
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 target_link_libraries(poly-benchmarks PRIVATE
     benchmark::benchmark
+    poly
 )

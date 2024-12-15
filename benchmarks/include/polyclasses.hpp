@@ -1,9 +1,7 @@
 #ifndef _POLICLASSES_HPP_
 #define _POLICLASSES_HPP_
 
-#include "poly.hpp"
-
-using namespace poly;
+#include "poly/poly.hpp"
 
 class PolyBase {
   __poly_set_class_id(0);

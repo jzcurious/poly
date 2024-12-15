@@ -1,5 +1,5 @@
 #include "classes.cpp"
-#include "poly.hpp"
+#include "poly/poly.hpp"
 #include "gtest/gtest.h"
 
 using namespace classes;
