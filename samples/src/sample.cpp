@@ -1,4 +1,4 @@
-#include "poly.hpp"
+#include "poly/poly.hpp"
 #include <iostream>
 
 class Base {

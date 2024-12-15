@@ -1,5 +1,5 @@
-#include "classes.cpp"
-#include "poly.hpp"
+#include "../../tests/src/classes.cpp"
+#include "poly/poly.hpp"
 
 #include <vector>
 
