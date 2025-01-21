@@ -4,7 +4,7 @@
 #include "poly/poly.hpp"
 
 class PolyBase {
-  __poly_set_class_id(0);
+  POLY_SET_CLASS_ID(0);
 
  public:
   float acc = 0;
@@ -46,7 +46,7 @@ class PolyBase {
 
 template <int x>
 class PolyDerived : public PolyBase {
-  __poly_set_class_id(x);
+  POLY_SET_CLASS_ID(x);
 
  public:
   float func_arity5f(float a0, float a1, float a2, float a3, float a4) {
@@ -84,15 +84,15 @@ class PolyDerived : public PolyBase {
   }
 };
 
-__poly_decl_dispatcher(
+POLY_DECL_DISPATCHER(
     Dispatcher,
     {
-      __poly_dispatch(func_arity5f);
-      __poly_dispatch(func_arity3f);
-      __poly_dispatch(func_arity2f);
-      __poly_dispatch(func_arity1f);
-      __poly_dispatch(func_arity0);
-      __poly_dispatch(get_acc);
+      POLY_DISPATCH(func_arity5f);
+      POLY_DISPATCH(func_arity3f);
+      POLY_DISPATCH(func_arity2f);
+      POLY_DISPATCH(func_arity1f);
+      POLY_DISPATCH(func_arity0);
+      POLY_DISPATCH(get_acc);
     },
     PolyBase,
     PolyDerived<1>,

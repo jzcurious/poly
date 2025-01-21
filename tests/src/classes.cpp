@@ -7,7 +7,7 @@
 namespace classes {
 
 class Base {
-  __poly_set_class_id(0);
+  POLY_SET_CLASS_ID(0);
 
  public:
   int x;
@@ -35,7 +35,7 @@ class Base {
 };
 
 class DerivedA : public Base {
-  __poly_set_class_id(1);
+  POLY_SET_CLASS_ID(1);
 
  public:
   int y = 3;
@@ -56,7 +56,7 @@ class DerivedA : public Base {
 };
 
 class DerivedB : public Base {
-  __poly_set_class_id(2);
+  POLY_SET_CLASS_ID(2);
 
  public:
   void echo() const {
@@ -74,7 +74,7 @@ class DerivedB : public Base {
 };
 
 class DerivedC : public Base {
-  __poly_set_class_id(3);
+  POLY_SET_CLASS_ID(3);
 
  public:
   void echo() const {
@@ -91,13 +91,13 @@ class DerivedC : public Base {
   }
 };
 
-__poly_decl_dispatcher(
+POLY_DECL_DISPATCHER(
     Dispatcher,
     {
-      __poly_dispatch(get_id);
-      __poly_dispatch(f1);
-      __poly_dispatch(f2);
-      __poly_dispatch(f3);
+      POLY_DISPATCH(get_id);
+      POLY_DISPATCH(f1);
+      POLY_DISPATCH(f2);
+      POLY_DISPATCH(f3);
     },
     Base,
     DerivedA,
