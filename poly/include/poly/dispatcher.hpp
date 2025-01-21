@@ -3,7 +3,7 @@
 
 #include "polysa.hpp"
 
-#define __poly_dispatch(_mfunc)                                                          \
+#define POLY_DISPATCH(_mfunc)                                                            \
                                                                                          \
  private:                                                                                \
   template <poly::poly_compatible Base_,                                                 \
@@ -70,7 +70,7 @@
         const_cast<Base*>(this->_ptr), std::forward<ArgTs>(args)...);                    \
   }
 
-#define __poly_decl_dispatcher(_name, _mfuncs, ...)                                      \
+#define POLY_DECL_DISPATCHER(_name, _mfuncs, ...)                                        \
   template <poly::poly_compatible Base,                                                  \
       poly::poly_compatible DerivedHead,                                                 \
       poly::poly_compatible... DerivedTail>                                              \

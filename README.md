@@ -45,7 +45,7 @@ _(see benchmarks.cpp)_
 #include <iostream>
 
 class Base {
-  __poly_set_class_id(0);
+  POLY_SET_CLASS_ID(0);
 
  public:
   int val = 8;
@@ -66,45 +66,45 @@ class Base {
 };
 
 class DerivedA : public Base {
-  __poly_set_class_id(1);
+  POLY_SET_CLASS_ID(1);
 
  public:
   int y = 3;
 
-  void overrided_function() const poly_override {
+  void overrided_function() const POLY_OVERRIDE {
     std::cout << __PRETTY_FUNCTION__ << std::endl;
   }
 
-  int partial_overrided_function(int x, int y) poly_override {
+  int partial_overrided_function(int x, int y) POLY_OVERRIDE {
     std::cout << __PRETTY_FUNCTION__ << std::endl;
     return x * y - val;
   }
 };
 
 class DerivedB : public Base {
-  __poly_set_class_id(2);
+  POLY_SET_CLASS_ID(2);
 
  public:
-  void overrided_function() const poly_override {
+  void overrided_function() const POLY_OVERRIDE {
     std::cout << __PRETTY_FUNCTION__ << std::endl;
   }
 };
 
 class DerivedC : public Base {
-  __poly_set_class_id(3);
+  POLY_SET_CLASS_ID(3);
 
  public:
-  void overrided_function() const poly_override {
+  void overrided_function() const POLY_OVERRIDE {
     std::cout << __PRETTY_FUNCTION__ << std::endl;
   }
 };
 
-__poly_decl_dispatcher(
+POLY_DECL_DISPATCHER(
     Dispatcher,
     {
-      __poly_dispatch(overrided_function);
-      __poly_dispatch(not_overrided_function);
-      __poly_dispatch(partial_overrided_function);
+      POLY_DISPATCH(overrided_function);
+      POLY_DISPATCH(not_overrided_function);
+      POLY_DISPATCH(partial_overrided_function);
     },
     Base,
     DerivedA,

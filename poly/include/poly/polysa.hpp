@@ -1,13 +1,13 @@
 #ifndef _POLYSA_HPP_
 #define _POLYSA_HPP_
 
-#define __poly_set_class_id(_cid)                                                        \
+#define POLY_SET_CLASS_ID(_cid)                                                          \
                                                                                          \
  public:                                                                                 \
   static constexpr const poly::cid_t scid = _cid;                                        \
   const poly::cid_t cid = _cid
 
-#define poly_override
+#define POLY_OVERRIDE
 
 namespace poly {
 
